@@ -1,41 +1,25 @@
-# vibe-stack-supabase
+# Form 14A signing tracker
 
-Next.js 15 + Supabase starter for shipping vibe-coded apps fast. Clone, provision, build.
+A private workspace for conveyancing teams to track property files, purchaser signatures, and follow-up notes.
 
-## Stack
+## Run locally
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js 15 (App Router, React 19, Server Actions) |
-| Language | TypeScript strict |
-| Styles | Tailwind CSS v4 (CSS-first, no config file) |
-| Auth + DB | Supabase (`@supabase/ssr`) |
-| Package manager | Bun |
-| Deploy | Vercel |
+1. Install dependencies with Bun (`bun install`).
+2. Link this project to Vercel and pull its development variables (`vercel link`, then `vercel env pull .env.local`).
+3. Apply `supabase/migrations/0001_init.sql` and `supabase/migrations/0002_owner_scoped_access.sql` to the connected Supabase project, in order, using its SQL editor.
+4. Set the Supabase Auth site URL to the deployed app URL and add `<app-url>/auth/callback` to its allowed redirect URLs.
+5. Run `bun dev` and open `http://localhost:3000`.
 
-## Quick start
+The first login receives a small set of sample files so the signing tracker is immediately explorable. Users can edit or remove those files. Every created file and purchaser belongs to the signed-in Supabase user; row-level security enforces that ownership.
 
-```bash
-bun install
-cp .env.example .env.local   # fill in your Supabase keys
-bun dev
-```
+## Core workflow
 
-Open http://localhost:3000. Edit `app/page.tsx` to start building.
+- Create a property file with its reference and address.
+- Add each purchaser who needs to sign Form 14A.
+- Mark purchasers as signed and record the signing date automatically.
+- Flag follow-up and keep the chase note with the purchaser.
+- Filter files, review completion, and reopen the record after refreshing.
 
-## Provisioning a new project
+## Environment variables
 
-Use the `/new-vibe-project <name>` skill (see `claude-dotfiles` repo) which:
-1. Clones this template and renames it
-2. Creates a new GitHub repo and pushes
-3. Creates a Supabase project and injects URL + anon key
-4. Creates a Vercel project linked to the GitHub repo
-5. Triggers first deploy and returns the preview URL
-
-## Working with AI
-
-See [CLAUDE.md](CLAUDE.md) for conventions. This repo is pre-wired for gstack — start with `/office-hours`.
-
-## Switching to Neon
-
-If you need Postgres without Supabase (e.g. prefer Drizzle ORM + Clerk for auth), a `vibe-stack-neon` variant is planned. For now: fork this and swap `@supabase/ssr` for `drizzle-orm` + `@neondatabase/serverless`, add Clerk or NextAuth.
+The browser uses `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `NEXT_PUBLIC_APP_URL`. They are pulled from the linked Vercel project into `.env.local`; do not commit that file. The Supabase service-role key is not used by this app.

@@ -1,4 +1,4 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
@@ -22,7 +22,7 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
@@ -34,8 +34,22 @@ export async function updateSession(request: NextRequest) {
       },
     });
 
-    // Refresh session so it doesn't expire while user is active
-    await supabase.auth.getUser();
+    // Refresh session so it doesn't expire while user is active.
+    const { data: { user } } = await supabase.auth.getUser();
+    const pathname = request.nextUrl.pathname;
+    const protectedRoute = pathname === "/" || pathname.startsWith("/files");
+    if (protectedRoute && !user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = "/login";
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (user && (pathname === "/login" || pathname === "/signup")) {
+      const homeUrl = request.nextUrl.clone();
+      homeUrl.pathname = "/";
+      homeUrl.search = "";
+      return NextResponse.redirect(homeUrl);
+    }
     return response;
   } catch {
     // Never let an auth hiccup crash the entire edge middleware
