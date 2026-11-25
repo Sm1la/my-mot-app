@@ -1,9 +1,9 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers } from "@/lib/types";
 
 async function seedFirstLogin(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (!user || authError || user.user_metadata?.form14a_demo_seeded === true) return;
+  const user = await getCurrentUser();
+  if (!user || user.user_metadata?.form14a_demo_seeded === true) return;
 
   const { count, error: countError } = await supabase.from("files").select("id", { count: "exact", head: true });
   if (countError) throw new Error("Could not check your workspace. Please refresh and try again.");
