@@ -12,6 +12,9 @@ export async function signInAction(_state: ActionState, formData: FormData): Pro
   if (!email || !password) return { error: "Enter your email and password." };
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error?.code === "invalid_credentials") {
+    return { error: "That email and password don’t match. Use Forgot password? to set a new password." };
+  }
   if (error) return { error: "We couldn’t sign you in. Check your details and try again." };
   redirect("/");
 }
@@ -25,6 +28,9 @@ export async function magicLinkAction(_state: ActionState, formData: FormData): 
     email,
     options: { shouldCreateUser: false, emailRedirectTo: `${appUrl}/auth/callback` },
   });
+  if (error?.code === "over_email_send_rate_limit") {
+    return { error: "MOT has reached its email limit. Try requesting a new link later." };
+  }
   if (error) return { error: "We couldn’t send a sign-in link. Check the address and try again." };
   return { success: true };
 }
@@ -36,8 +42,11 @@ export async function requestPasswordResetAction(_state: ActionState, formData: 
   const supabase = await createClient();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appUrl}/auth/callback` });
+  if (error?.code === "over_email_send_rate_limit") {
+    return { error: "MOT has reached its email limit. Try requesting a reset link later." };
+  }
   if (error && error.code !== "user_not_found") {
-    return { error: "We couldn’t request a reset link. Wait a minute and try again." };
+    return { error: "We couldn’t request a reset link. Please try again later." };
   }
   return { success: true };
 }
