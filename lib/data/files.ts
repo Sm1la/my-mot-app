@@ -1,9 +1,10 @@
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { getWorkspace } from "@/lib/data/workspace";
 import type { FileWithPurchasers } from "@/lib/types";
 
-async function seedFirstLogin(supabase: Awaited<ReturnType<typeof createClient>>) {
-  const user = await getCurrentUser();
-  if (!user || user.user_metadata?.form14a_demo_seeded === true) return;
+type StaffWorkspace = Extract<Awaited<ReturnType<typeof getWorkspace>>, { mode: "staff" }>;
+
+async function seedFirstLogin({ supabase, user }: StaffWorkspace) {
+  if (user.user_metadata?.form14a_demo_seeded === true) return;
 
   const { count, error: countError } = await supabase.from("files").select("id", { count: "exact", head: true });
   if (countError) throw new Error("Could not check your workspace. Please refresh and try again.");
@@ -38,10 +39,11 @@ async function seedFirstLogin(supabase: Awaited<ReturnType<typeof createClient>>
 }
 
 export async function getFiles(): Promise<FileWithPurchasers[]> {
-  const supabase = await createClient();
-  await seedFirstLogin(supabase);
+  const workspace = await getWorkspace();
+  const { supabase } = workspace;
+  if (workspace.mode === "staff") await seedFirstLogin(workspace);
   const { data: files, error } = await supabase
-    .from("files")
+    .from(workspace.files)
     .select("id, file_ref, property_address, status, notes, created_at")
     .order("created_at", { ascending: false });
 
@@ -49,7 +51,7 @@ export async function getFiles(): Promise<FileWithPurchasers[]> {
   if (!files?.length) return [];
 
   const { data: purchasers, error: purchaserError } = await supabase
-    .from("purchasers")
+    .from(workspace.purchasers)
     .select("id, file_id, name, signing_status, signing_date, follow_up_needed, follow_up_notes, created_at")
     .in("file_id", files.map((file) => file.id))
     .order("created_at", { ascending: true });

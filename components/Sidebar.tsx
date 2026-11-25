@@ -2,10 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { signOutAction } from "@/lib/actions/auth";
 
-export function Sidebar() {
+type WorkspaceMode = "demo" | "staff";
+const WorkspaceContext = createContext<WorkspaceMode | undefined>(undefined);
+
+export function WorkspaceField() {
+  return <input type="hidden" name="workspace" value={useContext(WorkspaceContext)} />;
+}
+
+export function Sidebar({ mode }: { mode?: WorkspaceMode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -25,12 +32,26 @@ export function Sidebar() {
           <span className="nav-icon">▦</span> All files
         </Link>
         <div className="sidebar-note"><span className="note-dot" />Keep every signature on track.</div>
-        <div className="sidebar-footer"><form action={signOutAction}><button className="signout-button">↪ Sign out</button></form><span>Form 14A · Conveyancing</span></div>
+        <div className="sidebar-footer">
+          {mode === "staff" && <form action={signOutAction}><button className="signout-button">↪ Sign out</button></form>}
+          {mode === "demo" && <Link className="signout-button" href="/login" onClick={() => setOpen(false)}>Staff sign-in</Link>}
+          <span>Form 14A · Conveyancing</span>
+        </div>
       </aside>
     </>
   );
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  return <div className="app-shell"><Sidebar /><main className="main-area">{children}</main></div>;
+export function AppShell({ children, mode }: { children: React.ReactNode; mode?: WorkspaceMode }) {
+  return (
+    <WorkspaceContext.Provider value={mode}>
+      <div className="app-shell">
+        <Sidebar mode={mode} />
+        <main className="main-area">
+          {mode === "demo" && <div className="demo-notice"><strong>Demo workspace</strong><span>Use sample data only. Changes are saved for this browser.</span></div>}
+          {children}
+        </main>
+      </div>
+    </WorkspaceContext.Provider>
+  );
 }

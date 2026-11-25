@@ -1,10 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
+import { getWorkspace } from "@/lib/data/workspace";
 import type { Purchaser } from "@/lib/types";
 
 export async function getPurchasers(fileId: string): Promise<Purchaser[]> {
-  const supabase = await createClient();
+  const { supabase, purchasers } = await getWorkspace();
   const { data, error } = await supabase
-    .from("purchasers")
+    .from(purchasers)
     .select("id, file_id, name, signing_status, signing_date, follow_up_needed, follow_up_notes, created_at")
     .eq("file_id", fileId)
     .order("created_at", { ascending: true });

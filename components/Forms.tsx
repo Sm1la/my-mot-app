@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { WorkspaceField } from "@/components/Sidebar";
 import { addPurchaserAction, updatePurchaserAction } from "@/lib/actions/purchasers";
 import { createFileAction, deleteFileAction, updateFileAction } from "@/lib/actions/files";
 import { deletePurchaserAction } from "@/lib/actions/purchasers";
@@ -13,6 +14,7 @@ export function FileForm({ file }: { file?: TransferFile }) {
   const [state, formAction, pending] = useActionState(action, initialState);
   return (
     <form action={formAction} className="form-stack">
+      <WorkspaceField />
       {file && <input type="hidden" name="id" value={file.id} />}
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
@@ -28,6 +30,7 @@ export function AddPurchaserForm({ fileId }: { fileId: string }) {
   const [state, formAction, pending] = useActionState(addPurchaserAction, initialState);
   return (
     <form action={formAction} className="add-purchaser-form">
+      <WorkspaceField />
       <input type="hidden" name="file_id" value={fileId} />
       <label className="sr-only" htmlFor="purchaser-name">Purchaser full name</label>
       <input id="purchaser-name" name="name" placeholder="Enter purchaser’s full name" required maxLength={180} />
@@ -40,13 +43,13 @@ export function AddPurchaserForm({ fileId }: { fileId: string }) {
 export function DeleteFileButton({ id, purchaserCount }: { id: string; purchaserCount: number }) {
   return <form action={deleteFileAction} onSubmit={(event) => {
     if (!window.confirm(`Delete this file and its ${purchaserCount} purchaser${purchaserCount === 1 ? "" : "s"}? This can’t be undone.`)) event.preventDefault();
-  }}><input type="hidden" name="id" value={id} /><button className="button button-danger-quiet">Delete file</button></form>;
+  }}><WorkspaceField /><input type="hidden" name="id" value={id} /><button className="button button-danger-quiet">Delete file</button></form>;
 }
 
 export function DeletePurchaserButton({ id, fileId, name }: { id: string; fileId: string; name: string }) {
   return <form action={deletePurchaserAction} onSubmit={(event) => {
     if (!window.confirm(`Remove ${name} from this file?`)) event.preventDefault();
-  }}><input type="hidden" name="id" value={id} /><input type="hidden" name="file_id" value={fileId} /><button className="icon-action danger-text" aria-label={`Delete ${name}`} title="Delete purchaser">×</button></form>;
+  }}><WorkspaceField /><input type="hidden" name="id" value={id} /><input type="hidden" name="file_id" value={fileId} /><button className="icon-action danger-text" aria-label={`Delete ${name}`} title="Delete purchaser">×</button></form>;
 }
 
 export function EditFileDetails({ file }: { file: TransferFile }) {
@@ -63,6 +66,7 @@ export function EditPurchaserForm({ purchaser, fileId }: { purchaser: Purchaser;
   return <>
     <button className="icon-action" aria-label={`Edit ${purchaser.name}`} title="Edit purchaser" onClick={() => setIsOpen(!isOpen)}>✎</button>
     {isOpen && <div className="purchaser-editor"><form action={formAction} className="form-stack">
+      <WorkspaceField />
       <input type="hidden" name="id" value={purchaser.id} /><input type="hidden" name="file_id" value={fileId} />
       <label className="field"><span>Purchaser name</span><input name="name" defaultValue={purchaser.name} required maxLength={180} /></label>
       <label className="field"><span>Follow-up note <em>Optional</em></span><textarea name="follow_up_notes" defaultValue={purchaser.follow_up_notes ?? ""} rows={2} maxLength={1000} /></label>
