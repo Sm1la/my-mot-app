@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getActionWorkspace } from "@/lib/data/workspace";
+import { isCalendarDate } from "@/lib/dates";
 import { motMilestones, type MotMilestoneDates } from "@/lib/milestones";
 import type { ActionState } from "@/lib/types";
 
@@ -11,6 +12,30 @@ function readProjectLocation(formData: FormData) {
   if (typeof value !== "string") return {};
   const [projectId, blockId] = value.split(":", 2);
   return { project_id: projectId || null, block_id: blockId || null };
+}
+
+function readRegisterDetails(formData: FormData) {
+  const fields = [
+    { key: "unit_no", label: "unit number", maxLength: 80 },
+    { key: "title_no", label: "title number", maxLength: 120 },
+    { key: "spa_date", label: "SPA date" },
+    { key: "mot_received_on", label: "MOT received date" },
+    { key: "title_released_on", label: "date released title" },
+  ] as const;
+  const values: Partial<Record<(typeof fields)[number]["key"], string | null>> = {};
+  for (const field of fields) {
+    const entry = formData.get(field.key);
+    if (typeof entry !== "string") continue;
+    const value = entry.trim();
+    if ("maxLength" in field && value.length > field.maxLength) {
+      return { error: `Enter a ${field.label} of ${field.maxLength} characters or fewer.` };
+    }
+    if (!("maxLength" in field) && value && !isCalendarDate(value)) {
+      return { error: `Enter a valid ${field.label}.` };
+    }
+    values[field.key] = value || null;
+  }
+  return { values };
 }
 
 export async function createFileAction(_state: ActionState, formData: FormData): Promise<ActionState> {
@@ -22,11 +47,13 @@ export async function createFileAction(_state: ActionState, formData: FormData):
   if (!file_ref) return { error: "Enter a file reference." };
   if (!property_address) return { error: "Enter the property address." };
   if (lawyer_name.length > 180) return { error: "Enter a lawyer name of 180 characters or fewer." };
+  const register = readRegisterDetails(formData);
+  if (register.error) return { error: register.error };
 
   const { supabase, files, owner } = await getActionWorkspace(formData);
   const { data, error } = await supabase
     .from(files)
-    .insert({ file_ref, property_address, ...readProjectLocation(formData), lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
+    .insert({ file_ref, property_address, ...readProjectLocation(formData), ...register.values, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
     .select("id")
     .single();
 
@@ -49,6 +76,8 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
   if (!file_ref) return { error: "Enter a file reference." };
   if (!property_address) return { error: "Enter the property address." };
   if (lawyer_name && lawyer_name.length > 180) return { error: "Enter a lawyer name of 180 characters or fewer." };
+  const register = readRegisterDetails(formData);
+  if (register.error) return { error: register.error };
 
   const { supabase, files } = await getActionWorkspace(formData);
   const updates = {
@@ -56,6 +85,7 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
     property_address,
     notes: notes || null,
     ...readProjectLocation(formData),
+    ...register.values,
     ...(lawyer_name === undefined ? {} : { lawyer_name: lawyer_name || null }),
   };
   const { error } = await supabase.from(files).update(updates).eq("id", id);
@@ -79,11 +109,7 @@ export async function updateMilestonesAction(_state: ActionState, formData: Form
       dates[key] = null;
       continue;
     }
-    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value) || value.startsWith("0000-")) {
-      return { error: `Enter a valid date for ${label}.` };
-    }
-    const date = new Date(`${value}T00:00:00Z`);
-    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    if (typeof value !== "string" || !isCalendarDate(value)) {
       return { error: `Enter a valid date for ${label}.` };
     }
     dates[key] = value;

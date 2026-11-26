@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { formatDate } from "@/lib/dates";
 import { getLatestMilestone } from "@/lib/milestones";
 import type { FileWithPurchasers } from "@/lib/types";
 
-const milestoneDateFormat = new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 export function FileListControls({ status, followUp, sort, companyId, projectId, blockId }: { status: string; followUp: string; sort: string; companyId?: string; projectId?: string; blockId?: string }) {
   return <form className="list-controls" method="get">
@@ -32,7 +32,7 @@ export function FileCard({ file, projectName }: { file: FileWithPurchasers; proj
     {file.lawyer_name && <p className="file-lawyer"><strong>Lawyer</strong> {file.lawyer_name}</p>}
     <div className="card-milestone">
       <strong>{milestone?.label ?? "No MOT milestones recorded"}</strong>
-      {milestoneDate && <time dateTime={milestoneDate}>{milestoneDateFormat.format(new Date(`${milestoneDate}T00:00:00Z`))}</time>}
+      {milestoneDate && <time dateTime={milestoneDate}>{formatDate(milestoneDate)}</time>}
     </div>
     <div className="card-progress"><span className="progress-copy">Signing progress</span><span className="signed-count">{signed}<span>/{total} signed</span></span></div>
     <div className="progress-track"><span style={{ width: `${completion}%` }} /></div>

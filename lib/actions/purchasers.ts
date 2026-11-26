@@ -6,13 +6,16 @@ import type { ActionState } from "@/lib/types";
 
 export async function addPurchaserAction(_state: ActionState, formData: FormData): Promise<ActionState> {
   const fileId = String(formData.get("file_id") ?? "");
-  const name = String(formData.get("name") ?? "").trim();
+  const names = formData.getAll("name").flatMap((value) => typeof value === "string" && value.trim() ? [value.trim()] : []);
   if (!fileId) return { error: "This file could not be identified." };
-  if (!name) return { error: "Enter the purchaser’s full name." };
+  if (names.length === 0) return { error: "Enter at least one purchaser’s full name." };
+  if (names.some((name) => name.length > 180)) return { error: "Enter purchaser names of 180 characters or fewer." };
+  if (new Set(names).size !== names.length) return { error: "Enter each purchaser name once." };
 
   const { supabase, purchasers, owner } = await getActionWorkspace(formData);
-  const { error } = await supabase.from(purchasers).insert({ file_id: fileId, name, signing_status: "pending", ...owner });
-  if (error) return { error: "We couldn’t add this purchaser. Check your connection and try again." };
+  const { error } = await supabase.from(purchasers).insert(names.map((name) => ({ file_id: fileId, name, signing_status: "pending", ...owner })));
+  if (error?.code === "23505") return { error: "A purchaser with that name is already on this file." };
+  if (error) return { error: "We couldn’t add the purchaser names. Please try again." };
   revalidatePath(`/files/${fileId}`);
   revalidatePath("/");
   return { success: true };

@@ -38,8 +38,17 @@ export function FileForm({ file, directory, projectId, blockId }: { file?: Trans
           })}
         </select>
       </label>
-      <label className="field"><span>Lawyer name <em>Optional</em></span><input name="lawyer_name" defaultValue={file?.lawyer_name ?? ""} maxLength={180} /></label>
-      <label className="field"><span>Notes <em>Optional</em></span><textarea name="notes" defaultValue={file?.notes ?? ""} placeholder="Add any useful context about this transfer" rows={4} maxLength={2000} /></label>
+      <div className="register-fields">
+        <label className="field"><span>Unit No. <em>Optional</em></span><input name="unit_no" defaultValue={file?.unit_no ?? ""} maxLength={80} /></label>
+        <label className="field"><span>SPA Date <em>Optional</em></span><input name="spa_date" type="date" min="0001-01-01" max="9999-12-31" defaultValue={file?.spa_date ?? ""} /></label>
+        <label className="field"><span>Title No. <em>Optional</em></span><input name="title_no" defaultValue={file?.title_no ?? ""} maxLength={120} /></label>
+        <label className="field"><span>MOT Lawyer <em>Optional</em></span><input name="lawyer_name" defaultValue={file?.lawyer_name ?? ""} maxLength={180} /></label>
+        {!file && <>
+          <label className="field"><span>MOT Received Date <em>Optional</em></span><input name="mot_received_on" type="date" min="0001-01-01" max="9999-12-31" /></label>
+          <label className="field"><span>Date Released Title <em>Optional</em></span><input name="title_released_on" type="date" min="0001-01-01" max="9999-12-31" /></label>
+        </>}
+      </div>
+      <label className="field"><span>Remarks <em>Optional</em></span><textarea name="notes" defaultValue={file?.notes ?? ""} rows={4} maxLength={2000} /></label>
       {state.error && <p className="form-error" role="alert">{state.error}</p>}
       {state.success && <p className="form-success" role="status">Changes saved.</p>}
       <div className="form-actions"><button className="button button-primary" disabled={pending}>{pending ? "Saving…" : file ? "Save changes" : "Create file"}</button></div>
@@ -47,15 +56,25 @@ export function FileForm({ file, directory, projectId, blockId }: { file?: Trans
   );
 }
 
-export function AddPurchaserForm({ fileId }: { fileId: string }) {
+export function AddPurchaserForm({ fileId, multiple = false }: { fileId: string; multiple?: boolean }) {
   const [state, formAction, pending] = useActionState(addPurchaserAction, initialState);
+  const [extraFields, setExtraFields] = useState(0);
   return (
-    <form action={formAction} className="add-purchaser-form">
+    <form action={formAction} className={multiple ? "form-stack batch-purchaser-form" : "add-purchaser-form"}>
       <WorkspaceField />
       <input type="hidden" name="file_id" value={fileId} />
-      <label className="sr-only" htmlFor="purchaser-name">Purchaser full name</label>
-      <input id="purchaser-name" name="name" placeholder="Enter purchaser’s full name" required maxLength={180} />
-      <button className="button button-primary" disabled={pending}>{pending ? "Adding…" : "+ Add purchaser"}</button>
+      {multiple ? <div className="register-fields">
+        {Array.from({ length: 3 + extraFields }, (_, index) => (
+          <label key={index} className="field"><span>Purchaser {index + 1} name</span><input name="name" maxLength={180} /></label>
+        ))}
+      </div> : <>
+        <label className="sr-only" htmlFor="purchaser-name">Purchaser full name</label>
+        <input id="purchaser-name" name="name" placeholder="Enter purchaser’s full name" required maxLength={180} />
+      </>}
+      <div className={multiple ? "batch-purchaser-actions" : undefined}>
+        <button className="button button-primary" disabled={pending}>{pending ? "Adding…" : multiple ? "Add purchasers" : "+ Add purchaser"}</button>
+        {multiple && <button type="button" className="button button-secondary" onClick={() => setExtraFields((count) => count + 1)}>+ Add another name</button>}
+      </div>
       {state.error && <p className="form-error form-error-wide" role="alert">{state.error}</p>}
     </form>
   );

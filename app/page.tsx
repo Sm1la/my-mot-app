@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/Sidebar";
 import { FileCard, FileListControls } from "@/components/FileList";
+import { ProjectRegister } from "@/components/ProjectRegister";
 import { getFiles } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
 import { getProjectBlocks, projectQuery } from "@/lib/project-blocks";
@@ -75,8 +76,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       </section>
     )}
     <section className="overview-stats" aria-label="File overview"><div className="overview-stat"><span className="stat-icon icon-lavender">▦</span><span><small>Total files</small><strong>{files.length}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-mint">◷</span><span><small>Open files</small><strong>{openCount}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-amber">!</span><span><small>Need follow-up</small><strong>{followUpCount}</strong></span></div></section>
-    <div className="section-heading"><div><h2>{company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2><p>Review MOT milestones and purchaser signatures.</p></div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} /></div>
-    {filtered.length ? <div className="file-grid">{filtered.map((file) => {
+    <div className="section-heading"><div><h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>{!project && <p>Review MOT milestones and purchaser signatures.</p>}</div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} /></div>
+    {project ? <ProjectRegister files={filtered} hasFiles={files.length > 0} /> : filtered.length ? <div className="file-grid">{filtered.map((file) => {
       const fileProject = file.project_id ? projectsById.get(file.project_id) : undefined;
       const fileBlock = getProjectBlocks(fileProject).find((item) => item.id === file.block_id);
       return <FileCard key={file.id} file={file} projectName={fileBlock ? `${fileProject?.name} / ${fileBlock.name}` : fileProject?.name} />;

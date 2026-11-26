@@ -12,6 +12,9 @@ export type TransferFile = MotMilestoneDates & {
   id: string;
   file_ref: string;
   property_address: string;
+  unit_no: string | null;
+  spa_date: string | null;
+  title_no: string | null;
   project_id: string | null;
   block_id: BlockId | null;
   lawyer_name: string | null;
