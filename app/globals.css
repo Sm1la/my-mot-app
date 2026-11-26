@@ -230,3 +230,33 @@
 
 .register-check[aria-checked=true] { background: #5140bf; border-color: #5140bf; }
 .register-check:focus-visible { outline: 2px solid #6354c9; outline-offset: 2px; }
+
+.registration-summary {
+  margin-bottom: 24px;
+  padding: 18px;
+}
+
+.registration-summary h2, .title-release-summary h2 { margin: 0 0 12px; font-size: 16px; }
+.registration-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.registration-summary-grid > div { padding: 10px 12px; border-radius: 9px; background: #f7f5fc; }
+.registration-summary-grid dt { color: #59647a; font-size: 12px; font-weight: 600; }
+.registration-summary-grid dd { margin: 4px 0 0; font-size: 19px; font-weight: 700; }
+.registration-operational { margin: 12px 0 0; color: #59647a; font-size: 12px; }
+.registration-progress { display: grid; gap: 5px; min-width: 65px; }
+.registration-progress progress { width: 100%; height: 7px; accent-color: #5140bf; }
+
+.project-summary-table { width: 100%; min-width: 465px; border-collapse: collapse; text-align: left; font-size: 13px; }
+.project-summary-table th, .project-summary-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.project-summary-table thead, .release-year { background: #f0eefc; color: #423580; }
+.project-summary-table tbody:last-child tr:last-child > * { border-bottom: 0; }
+.company-projects .project-summary-table a, .release-summary-table a { display: inline; padding: 0; border: 0; background: transparent; color: #5140bf; text-decoration: underline; }
+.title-release-summary { margin-bottom: 24px; }
+.title-release-summary p { margin: 0; color: #59647a; }
+.release-summary-table { min-width: 270px; }
+.release-year td { font-weight: 700; }

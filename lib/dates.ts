@@ -1,7 +1,12 @@
 const dateFormat = new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const monthFormat = new Intl.DateTimeFormat("en-MY", { month: "long", year: "numeric", timeZone: "UTC" });
 
 export function formatDate(value: string) {
   return dateFormat.format(new Date(`${value}T00:00:00Z`));
+}
+
+export function formatMonth(value: string) {
+  return monthFormat.format(new Date(`${value}-01T00:00:00Z`));
 }
 
 export function isCalendarDate(value: string) {
