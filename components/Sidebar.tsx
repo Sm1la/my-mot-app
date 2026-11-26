@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 import { signOutAction } from "@/lib/actions/auth";
+import { getProjectBlocks, projectQuery, type BlockId } from "@/lib/project-blocks";
 import type { ProjectDirectory } from "@/lib/types";
 
 type WorkspaceMode = "demo" | "staff";
@@ -18,9 +19,10 @@ type NavigationProps = {
   directory?: ProjectDirectory;
   activeCompanyId?: string;
   activeProjectId?: string;
+  activeBlockId?: BlockId;
 };
 
-export function Sidebar({ mode, directory, activeCompanyId, activeProjectId }: NavigationProps) {
+export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, activeBlockId }: NavigationProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -52,9 +54,16 @@ export function Sidebar({ mode, directory, activeCompanyId, activeProjectId }: N
                 {company.id === activeCompanyId && (
                   <div className="project-nav">
                     {directory.projects.filter((project) => project.company_id === company.id).map((project) => (
-                      <Link key={project.id} href={`/?project=${project.id}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link ${project.id === activeProjectId ? "nav-active" : ""}`}>
-                        {project.name}
-                      </Link>
+                      <div key={project.id}>
+                        <Link href={`/${projectQuery(project.id)}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link ${project.id === activeProjectId && !activeBlockId ? "nav-active" : ""}`}>
+                          {project.name}
+                        </Link>
+                        {getProjectBlocks(project).map((block) => (
+                          <Link key={block.id} href={`/${projectQuery(project.id, block.id)}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link block-nav-link ${project.id === activeProjectId && block.id === activeBlockId ? "nav-active" : ""}`}>
+                            {block.name}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 )}

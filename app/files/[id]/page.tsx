@@ -6,6 +6,7 @@ import { FileMilestones } from "@/components/FileMilestones";
 import { PurchaserTable } from "@/components/PurchaserTable";
 import { getFile } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
+import { getProjectBlocks, projectQuery } from "@/lib/project-blocks";
 import { toggleFileStatus } from "@/lib/actions/files";
 import { getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers, ProjectDirectory } from "@/lib/types";
@@ -23,16 +24,17 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
   if (!file) notFound();
 
   const project = directory.projects.find((item) => item.id === file.project_id);
+  const block = getProjectBlocks(project).find((item) => item.id === file.block_id);
   const signed = file.purchasers.filter((p) => p.signing_status === "signed").length;
   const total = file.purchasers.length;
-  return <AppShell mode={mode} directory={directory} activeCompanyId={project?.company_id} activeProjectId={project?.id}><div className="page-wrap">
+  return <AppShell mode={mode} directory={directory} activeCompanyId={project?.company_id} activeProjectId={project?.id} activeBlockId={block?.id}><div className="page-wrap">
     <Link href="/" className="back-link">← All files</Link>
     <section className="detail-hero">
       <div className="detail-hero-copy">
         <span className={`status-pill ${file.status === "open" ? "status-open" : "status-closed"}`}><i />{file.status === "open" ? "Open file" : "Closed file"}</span>
         <h1>{file.file_ref}</h1>
         <p className="detail-address">⌖ {file.property_address}</p>
-        {project && <p className="file-lawyer"><strong>Project</strong> <Link className="project-detail-link" href={`/?project=${project.id}`}>{project.name}</Link></p>}
+        {project && <p className="file-lawyer"><strong>Project</strong> <Link className="project-detail-link" href={`/${projectQuery(project.id, block?.id)}`}>{project.name}{block && ` / ${block.name}`}</Link></p>}
         {file.lawyer_name && <p className="file-lawyer"><strong>Lawyer</strong> {file.lawyer_name}</p>}
         {file.notes && <p className="file-notes">{file.notes}</p>}
       </div>

@@ -166,3 +166,5 @@
 .company-projects ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .company-projects a { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: #5140bf; overflow-wrap: anywhere; }
 .project-detail-link { color: #5140bf; text-decoration: underline; }
+
+.block-nav-link { margin-left: 14px; }

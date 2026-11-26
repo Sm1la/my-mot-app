@@ -6,10 +6,11 @@ import type { FileWithPurchasers } from "@/lib/types";
 
 const milestoneDateFormat = new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
-export function FileListControls({ status, followUp, sort, companyId, projectId }: { status: string; followUp: string; sort: string; companyId?: string; projectId?: string }) {
+export function FileListControls({ status, followUp, sort, companyId, projectId, blockId }: { status: string; followUp: string; sort: string; companyId?: string; projectId?: string; blockId?: string }) {
   return <form className="list-controls" method="get">
     {companyId && <input type="hidden" name="company" value={companyId} />}
     {projectId && <input type="hidden" name="project" value={projectId} />}
+    {blockId && <input type="hidden" name="block" value={blockId} />}
     <label className="filter-select"><span className="sr-only">Filter files by status</span><select name="status" defaultValue={status} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="all">All statuses</option><option value="open">Open files</option><option value="closed">Closed files</option></select></label>
     <label className="filter-select"><span className="sr-only">Filter files by follow-up</span><select name="followup" defaultValue={followUp} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="all">All files</option><option value="yes">Needs follow-up</option></select></label>
     <label className="filter-select"><span className="sr-only">Sort files</span><select name="sort" defaultValue={sort} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="recent">Most recent</option><option value="completion">Least complete</option></select></label>

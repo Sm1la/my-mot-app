@@ -1,17 +1,21 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { Fragment, useActionState, useState } from "react";
 import { WorkspaceField } from "@/components/Sidebar";
 import { addPurchaserAction, updatePurchaserAction } from "@/lib/actions/purchasers";
 import { createFileAction, deleteFileAction, updateFileAction } from "@/lib/actions/files";
 import { deletePurchaserAction } from "@/lib/actions/purchasers";
+import { getProjectBlocks, type BlockId } from "@/lib/project-blocks";
 import type { ActionState, ProjectDirectory, Purchaser, TransferFile } from "@/lib/types";
 
 const initialState: ActionState = {};
 
-export function FileForm({ file, directory, projectId }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string }) {
+export function FileForm({ file, directory, projectId, blockId }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId }) {
   const action = file ? updateFileAction : createFileAction;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const selectedProject = file?.project_id ?? projectId;
+  const selectedBlock = file?.block_id ?? blockId;
+  const selectedLocation = selectedProject ? `${selectedProject}${selectedBlock ? `:${selectedBlock}` : ""}` : "";
   return (
     <form action={formAction} className="form-stack">
       <WorkspaceField />
@@ -19,14 +23,17 @@ export function FileForm({ file, directory, projectId }: { file?: TransferFile; 
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
       <label className="field">
-        <span>Project <em>Optional</em></span>
-        <select name="project_id" defaultValue={file?.project_id ?? projectId ?? ""}>
+        <span>Project or tower <em>Optional</em></span>
+        <select name="project_location" defaultValue={selectedLocation}>
           <option value="">No project</option>
           {directory.companies.map((company) => {
             const projects = directory.projects.filter((project) => project.company_id === company.id);
             if (!projects.length) return null;
             return <optgroup key={company.id} label={company.name}>
-              {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+              {projects.map((project) => <Fragment key={project.id}>
+                <option value={project.id}>{project.name}</option>
+                {getProjectBlocks(project).map((block) => <option key={block.id} value={`${project.id}:${block.id}`}>{project.name} / {block.name}</option>)}
+              </Fragment>)}
             </optgroup>;
           })}
         </select>
