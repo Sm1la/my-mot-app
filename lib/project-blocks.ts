@@ -7,6 +7,7 @@ const standardProjects = [
   ] },
   { company: "selayang-mulia", name: "Phase 1", blocks: [] },
   { company: "selayang-mulia", name: "Phase 1B", blocks: [] },
+  { company: "selayang-mulia", name: "Phase 1C", blocks: [] },
   { company: "selayang-mulia", name: "Low Cost Flat and Shop", blocks: [
     { id: "mawar", name: "Block A (Mawar)" },
     { id: "teratai", name: "Block B (Teratai)" },
