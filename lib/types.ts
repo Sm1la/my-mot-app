@@ -1,10 +1,13 @@
+import type { MotMilestoneDates } from "@/lib/milestones";
+
 export type FileStatus = "open" | "closed";
 export type SigningStatus = "pending" | "signed";
 
-export type TransferFile = {
+export type TransferFile = MotMilestoneDates & {
   id: string;
   file_ref: string;
   property_address: string;
+  lawyer_name: string | null;
   status: FileStatus;
   notes: string | null;
   created_at: string;

@@ -18,6 +18,7 @@ export function FileForm({ file }: { file?: TransferFile }) {
       {file && <input type="hidden" name="id" value={file.id} />}
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
+      <label className="field"><span>Lawyer name <em>Optional</em></span><input name="lawyer_name" defaultValue={file?.lawyer_name ?? ""} maxLength={180} /></label>
       <label className="field"><span>Notes <em>Optional</em></span><textarea name="notes" defaultValue={file?.notes ?? ""} placeholder="Add any useful context about this transfer" rows={4} maxLength={2000} /></label>
       {state.error && <p className="form-error" role="alert">{state.error}</p>}
       {state.success && <p className="form-success" role="status">Changes saved.</p>}

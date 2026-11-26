@@ -99,3 +99,40 @@
   color: #423580;
   font-size: 13px;
 }
+
+.milestone-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 175px), 1fr));
+  gap: 16px;
+}
+
+.milestone-fields input {
+  min-width: 0;
+  width: 100%;
+}
+
+.milestone-actions, .card-milestone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+
+.card-milestone {
+  justify-content: space-between;
+  margin-block: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #f0eefc;
+  color: #423580;
+  font-size: 12px;
+}
+
+.file-lawyer {
+  margin: 5px 0;
+  color: #59647a;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.file-lawyer strong { margin-right: 4px; }
