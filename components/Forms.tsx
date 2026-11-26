@@ -23,7 +23,7 @@ export function FileForm({ file, directory, projectId, blockId }: { file?: Trans
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
       <label className="field">
-        <span>Project or tower <em>Optional</em></span>
+        <span>Project or block <em>Optional</em></span>
         <select name="project_location" defaultValue={selectedLocation}>
           <option value="">No project</option>
           {directory.companies.map((company) => {

@@ -58,7 +58,7 @@ export async function createFileAction(_state: ActionState, formData: FormData):
     .single();
 
   if (error?.code === "23503") return { error: "Choose a project from this workspace." };
-  if (error?.code === "23514" && error.message.includes("tower")) return { error: "Choose a tower that belongs to the selected project." };
+  if (error?.code === "23514" && error.message.includes("chosen block")) return { error: "Choose a block that belongs to the selected project." };
   if (error || !data) return { error: "We couldn’t save this file. Check your connection and try again." };
   revalidatePath("/");
   redirect(`/files/${data.id}`);
@@ -90,7 +90,7 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
   };
   const { error } = await supabase.from(files).update(updates).eq("id", id);
   if (error?.code === "23503") return { error: "Choose a project from this workspace." };
-  if (error?.code === "23514" && error.message.includes("tower")) return { error: "Choose a tower that belongs to the selected project." };
+  if (error?.code === "23514" && error.message.includes("chosen block")) return { error: "Choose a block that belongs to the selected project." };
   if (error) return { error: "We couldn’t update this file. Check your connection and try again." };
   revalidatePath("/");
   revalidatePath(`/files/${id}`);

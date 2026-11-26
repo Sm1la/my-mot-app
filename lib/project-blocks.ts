@@ -1,18 +1,36 @@
 import type { Project } from "@/lib/types";
 
-const airaBlocks = [
-  { id: "tower-a", name: "Tower A" },
-  { id: "tower-b", name: "Tower B" },
+const standardProjects = [
+  { company: "selangor-properties", name: "Aira Residence Damansara", blocks: [
+    { id: "tower-a", name: "Tower A" },
+    { id: "tower-b", name: "Tower B" },
+  ] },
+  { company: "selayang-mulia", name: "Phase 1", blocks: [] },
+  { company: "selayang-mulia", name: "Phase 1B", blocks: [] },
+  { company: "selayang-mulia", name: "Low Cost Flat and Shop", blocks: [
+    { id: "mawar", name: "Block A (Mawar)" },
+    { id: "teratai", name: "Block B (Teratai)" },
+  ] },
 ] as const;
 
-export type BlockId = (typeof airaBlocks)[number]["id"];
+type StandardProject = (typeof standardProjects)[number];
+export type BlockId = StandardProject["blocks"][number]["id"];
 
-export function isAiraProject(project: Project) {
-  return project.company_id === "selangor-properties" && project.name.trim().toLowerCase() === "aira residence damansara";
+function matchesProject(project: Project, standard: StandardProject) {
+  return project.company_id === standard.company && project.name.trim().toLowerCase() === standard.name.toLowerCase();
+}
+
+export function hasStandardProjects(projects: Project[]) {
+  return standardProjects.every((standard) => projects.some((project) => matchesProject(project, standard)));
+}
+
+export function getStandardProjectOrder(project: Project) {
+  const index = standardProjects.findIndex((standard) => matchesProject(project, standard));
+  return index === -1 ? standardProjects.length : index;
 }
 
 export function getProjectBlocks(project?: Project) {
-  return project && isAiraProject(project) ? airaBlocks : [];
+  return (project && standardProjects.find((standard) => matchesProject(project, standard))?.blocks) || [];
 }
 
 export function projectQuery(projectId: string, blockId?: BlockId | null) {

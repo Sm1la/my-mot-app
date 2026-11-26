@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { getWorkspace } from "@/lib/data/workspace";
-import { isAiraProject } from "@/lib/project-blocks";
+import { getStandardProjectOrder, hasStandardProjects } from "@/lib/project-blocks";
 import type { ProjectDirectory } from "@/lib/types";
 
 export const getProjectDirectory = cache(async (): Promise<ProjectDirectory> => {
@@ -12,12 +12,13 @@ export const getProjectDirectory = cache(async (): Promise<ProjectDirectory> => 
   ]);
   if (companies.error || listedProjects.error) throw new Error("Could not load companies and projects. Please try again.");
   let projects = listedProjects.data;
-  if (!projects.some(isAiraProject)) {
-    const { error } = await supabase.rpc("ensure_aira_project");
-    if (error) throw new Error("Could not prepare Aira Residence Damansara. Please try again.");
+  if (!hasStandardProjects(projects)) {
+    const { error } = await supabase.rpc("ensure_standard_projects");
+    if (error) throw new Error("Could not prepare the standard projects. Please try again.");
     const refreshed = await listProjects();
     if (refreshed.error) throw new Error("Could not load projects. Please try again.");
     projects = refreshed.data;
   }
+  projects.sort((left, right) => getStandardProjectOrder(left) - getStandardProjectOrder(right));
   return { companies: companies.data, projects };
 });
