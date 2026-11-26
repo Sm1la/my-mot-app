@@ -209,3 +209,24 @@
 .project-register .register-empty { text-align: center; padding: 25px; color: #59647a; }
 .batch-purchaser-form { min-width: 0; }
 .batch-purchaser-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.register-registration { display: grid; justify-items: start; gap: 5px; min-width: 80px; }
+.register-registration time { color: #59647a; font-size: 11px; white-space: nowrap; }
+.register-registration .form-error { margin: 0; }
+
+.register-check {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #8378b8;
+  border-radius: 6px;
+  background: white;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.register-check[aria-checked=true] { background: #5140bf; border-color: #5140bf; }
+.register-check:focus-visible { outline: 2px solid #6354c9; outline-offset: 2px; }

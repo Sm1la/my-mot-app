@@ -125,6 +125,25 @@ export async function updateMilestonesAction(_state: ActionState, formData: Form
   return { success: true };
 }
 
+export async function toggleRegistrationAction(_state: ActionState, formData: FormData): Promise<ActionState> {
+  const id = String(formData.get("id") ?? "");
+  const previousDate = formData.get("previous_registration_date");
+  if (!id || typeof previousDate !== "string" || (previousDate && !isCalendarDate(previousDate))) {
+    return { error: "Reload the page and try again." };
+  }
+
+  const { supabase, files } = await getActionWorkspace(formData);
+  const nextDate = previousDate ? null : new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Kuala_Lumpur" });
+  const update = supabase.from(files).update({ title_registered_on: nextDate }).eq("id", id);
+  const guardedUpdate = previousDate ? update.eq("title_registered_on", previousDate) : update.is("title_registered_on", null);
+  const { data, error } = await guardedUpdate.select("id").maybeSingle();
+  if (error) return { error: "Could not save registration. Try again." };
+
+  revalidatePath("/");
+  revalidatePath(`/files/${id}`);
+  return data ? { success: true } : { error: "Registration changed. Check the current date and try again." };
+}
+
 export async function toggleFileStatus(formData: FormData): Promise<void> {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");

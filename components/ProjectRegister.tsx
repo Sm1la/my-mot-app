@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { RegistrationToggle } from "@/components/RegistrationToggle";
 import { formatDate } from "@/lib/dates";
 import type { FileWithPurchasers } from "@/lib/types";
 
-const columns = ["No.", "Unit No.", "Purchaser Name", "SPA Date", "Title No", "MOT Lawyer", "MOT Received Date", "Date Released Title", "Remarks"];
+const columns = ["No.", "Unit No.", "Purchaser Name", "SPA Date", "Title No", "MOT Lawyer", "MOT Received Date", "Date Released Title", "Registered", "Remarks"];
 
 function RegisterDate({ value }: { value: string | null }) {
   return value ? <time dateTime={value}>{formatDate(value)}</time> : "—";
@@ -28,6 +29,7 @@ export function ProjectRegister({ files, hasFiles }: { files: FileWithPurchasers
               <td>{file.lawyer_name || "—"}</td>
               <td className="register-date"><RegisterDate value={file.mot_received_on} /></td>
               <td className="register-date"><RegisterDate value={file.title_released_on} /></td>
+              <td><RegistrationToggle fileId={file.id} label={file.unit_no || file.file_ref} date={file.title_registered_on} /></td>
               <td className="register-remarks">{file.notes || "—"}</td>
             </tr>
           ))}
