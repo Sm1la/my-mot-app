@@ -5,11 +5,11 @@ import { WorkspaceField } from "@/components/Sidebar";
 import { addPurchaserAction, updatePurchaserAction } from "@/lib/actions/purchasers";
 import { createFileAction, deleteFileAction, updateFileAction } from "@/lib/actions/files";
 import { deletePurchaserAction } from "@/lib/actions/purchasers";
-import type { ActionState, Purchaser, TransferFile } from "@/lib/types";
+import type { ActionState, ProjectDirectory, Purchaser, TransferFile } from "@/lib/types";
 
 const initialState: ActionState = {};
 
-export function FileForm({ file }: { file?: TransferFile }) {
+export function FileForm({ file, directory, projectId }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string }) {
   const action = file ? updateFileAction : createFileAction;
   const [state, formAction, pending] = useActionState(action, initialState);
   return (
@@ -18,6 +18,19 @@ export function FileForm({ file }: { file?: TransferFile }) {
       {file && <input type="hidden" name="id" value={file.id} />}
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
+      <label className="field">
+        <span>Project <em>Optional</em></span>
+        <select name="project_id" defaultValue={file?.project_id ?? projectId ?? ""}>
+          <option value="">No project</option>
+          {directory.companies.map((company) => {
+            const projects = directory.projects.filter((project) => project.company_id === company.id);
+            if (!projects.length) return null;
+            return <optgroup key={company.id} label={company.name}>
+              {projects.map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}
+            </optgroup>;
+          })}
+        </select>
+      </label>
       <label className="field"><span>Lawyer name <em>Optional</em></span><input name="lawyer_name" defaultValue={file?.lawyer_name ?? ""} maxLength={180} /></label>
       <label className="field"><span>Notes <em>Optional</em></span><textarea name="notes" defaultValue={file?.notes ?? ""} placeholder="Add any useful context about this transfer" rows={4} maxLength={2000} /></label>
       {state.error && <p className="form-error" role="alert">{state.error}</p>}
@@ -53,11 +66,11 @@ export function DeletePurchaserButton({ id, fileId, name }: { id: string; fileId
   }}><WorkspaceField /><input type="hidden" name="id" value={id} /><input type="hidden" name="file_id" value={fileId} /><button className="icon-action danger-text" aria-label={`Delete ${name}`} title="Delete purchaser">×</button></form>;
 }
 
-export function EditFileDetails({ file }: { file: TransferFile }) {
+export function EditFileDetails({ file, directory }: { file: TransferFile; directory: ProjectDirectory }) {
   const [isOpen, setIsOpen] = useState(false);
   return <>
     <button className="button button-secondary" onClick={() => setIsOpen(!isOpen)}>{isOpen ? "Close edit" : "Edit file"}</button>
-    {isOpen && <div className="inline-editor"><h3>Edit file details</h3><FileForm file={file} /></div>}
+    {isOpen && <div className="inline-editor"><h3>Edit file details</h3><FileForm file={file} directory={directory} /></div>}
   </>;
 }
 

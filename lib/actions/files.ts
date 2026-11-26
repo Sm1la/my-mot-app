@@ -9,6 +9,7 @@ import type { ActionState } from "@/lib/types";
 export async function createFileAction(_state: ActionState, formData: FormData): Promise<ActionState> {
   const file_ref = String(formData.get("file_ref") ?? "").trim();
   const property_address = String(formData.get("property_address") ?? "").trim();
+  const project_id = String(formData.get("project_id") ?? "") || null;
   const lawyer_name = String(formData.get("lawyer_name") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
 
@@ -19,10 +20,11 @@ export async function createFileAction(_state: ActionState, formData: FormData):
   const { supabase, files, owner } = await getActionWorkspace(formData);
   const { data, error } = await supabase
     .from(files)
-    .insert({ file_ref, property_address, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
+    .insert({ file_ref, property_address, project_id, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
     .select("id")
     .single();
 
+  if (error?.code === "23503") return { error: "Choose a project from this workspace." };
   if (error || !data) return { error: "We couldn’t save this file. Check your connection and try again." };
   revalidatePath("/");
   redirect(`/files/${data.id}`);
@@ -32,6 +34,7 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
   const id = String(formData.get("id") ?? "");
   const file_ref = String(formData.get("file_ref") ?? "").trim();
   const property_address = String(formData.get("property_address") ?? "").trim();
+  const projectId = formData.get("project_id");
   const lawyerName = formData.get("lawyer_name");
   const lawyer_name = typeof lawyerName === "string" ? lawyerName.trim() : undefined;
   const notes = String(formData.get("notes") ?? "").trim();
@@ -46,9 +49,11 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
     file_ref,
     property_address,
     notes: notes || null,
+    ...(typeof projectId === "string" ? { project_id: projectId || null } : {}),
     ...(lawyer_name === undefined ? {} : { lawyer_name: lawyer_name || null }),
   };
   const { error } = await supabase.from(files).update(updates).eq("id", id);
+  if (error?.code === "23503") return { error: "Choose a project from this workspace." };
   if (error) return { error: "We couldn’t update this file. Check your connection and try again." };
   revalidatePath("/");
   revalidatePath(`/files/${id}`);

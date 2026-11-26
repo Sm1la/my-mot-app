@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 import { signOutAction } from "@/lib/actions/auth";
+import type { ProjectDirectory } from "@/lib/types";
 
 type WorkspaceMode = "demo" | "staff";
 const WorkspaceContext = createContext<WorkspaceMode | undefined>(undefined);
@@ -12,7 +13,14 @@ export function WorkspaceField() {
   return <input type="hidden" name="workspace" value={useContext(WorkspaceContext)} />;
 }
 
-export function Sidebar({ mode }: { mode?: WorkspaceMode }) {
+type NavigationProps = {
+  mode?: WorkspaceMode;
+  directory?: ProjectDirectory;
+  activeCompanyId?: string;
+  activeProjectId?: string;
+};
+
+export function Sidebar({ mode, directory, activeCompanyId, activeProjectId }: NavigationProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -27,11 +35,33 @@ export function Sidebar({ mode }: { mode?: WorkspaceMode }) {
         <Link href="/" className="brand desktop-brand" onClick={() => setOpen(false)}>
           <span className="brand-mark">14</span><span><strong>Form 14A</strong><small>Signing tracker</small></span>
         </Link>
-        <div className="nav-label">WORKSPACE</div>
-        <Link href="/" onClick={() => setOpen(false)} className={`nav-link ${pathname === "/" ? "nav-active" : ""}`}>
-          <span className="nav-icon">▦</span> All files
-        </Link>
-        <div className="sidebar-note"><span className="note-dot" />Keep every signature on track.</div>
+        <nav className="sidebar-navigation" aria-label="Workspace">
+          <div className="nav-label">WORKSPACE</div>
+          <Link href="/" onClick={() => setOpen(false)} className={`nav-link ${pathname === "/" && !activeCompanyId ? "nav-active" : ""}`}>
+            <span className="nav-icon">▦</span> All files
+          </Link>
+          {directory && <>
+            <div className="nav-label company-nav-label">COMPANIES</div>
+            {directory.companies.map((company) => (
+              <div key={company.id}>
+                <Link
+                  href={`/?company=${company.id}`}
+                  onClick={() => setOpen(false)}
+                  className={`nav-link company-nav-link ${company.id === activeCompanyId && !activeProjectId ? "nav-active" : ""}`}
+                >{company.name}</Link>
+                {company.id === activeCompanyId && (
+                  <div className="project-nav">
+                    {directory.projects.filter((project) => project.company_id === company.id).map((project) => (
+                      <Link key={project.id} href={`/?project=${project.id}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link ${project.id === activeProjectId ? "nav-active" : ""}`}>
+                        {project.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </>}
+        </nav>
         <div className="sidebar-footer">
           {mode === "staff" && <form action={signOutAction}><button className="signout-button">↪ Sign out</button></form>}
           {mode === "demo" && <Link className="signout-button" href="/login" onClick={() => setOpen(false)}>Staff sign-in</Link>}
@@ -42,13 +72,13 @@ export function Sidebar({ mode }: { mode?: WorkspaceMode }) {
   );
 }
 
-export function AppShell({ children, mode }: { children: React.ReactNode; mode?: WorkspaceMode }) {
+export function AppShell({ children, ...navigation }: NavigationProps & { children: React.ReactNode }) {
   return (
-    <WorkspaceContext.Provider value={mode}>
+    <WorkspaceContext.Provider value={navigation.mode}>
       <div className="app-shell">
-        <Sidebar mode={mode} />
+        <Sidebar {...navigation} />
         <main className="main-area">
-          {mode === "demo" && <div className="demo-notice"><strong>Demo workspace</strong><span>Use sample data only. Changes are saved for this browser.</span></div>}
+          {navigation.mode === "demo" && <div className="demo-notice"><strong>Demo workspace</strong><span>Use sample data only. Changes are saved for this browser.</span></div>}
           {children}
         </main>
       </div>

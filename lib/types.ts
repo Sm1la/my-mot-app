@@ -3,10 +3,15 @@ import type { MotMilestoneDates } from "@/lib/milestones";
 export type FileStatus = "open" | "closed";
 export type SigningStatus = "pending" | "signed";
 
+export type Company = { id: string; name: string };
+export type Project = { id: string; company_id: string; name: string };
+export type ProjectDirectory = { companies: Company[]; projects: Project[] };
+
 export type TransferFile = MotMilestoneDates & {
   id: string;
   file_ref: string;
   property_address: string;
+  project_id: string | null;
   lawyer_name: string | null;
   status: FileStatus;
   notes: string | null;

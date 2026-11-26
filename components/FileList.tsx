@@ -6,15 +6,17 @@ import type { FileWithPurchasers } from "@/lib/types";
 
 const milestoneDateFormat = new Intl.DateTimeFormat("en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
-export function FileListControls({ status, followUp, sort }: { status: string; followUp: string; sort: string }) {
+export function FileListControls({ status, followUp, sort, companyId, projectId }: { status: string; followUp: string; sort: string; companyId?: string; projectId?: string }) {
   return <form className="list-controls" method="get">
+    {companyId && <input type="hidden" name="company" value={companyId} />}
+    {projectId && <input type="hidden" name="project" value={projectId} />}
     <label className="filter-select"><span className="sr-only">Filter files by status</span><select name="status" defaultValue={status} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="all">All statuses</option><option value="open">Open files</option><option value="closed">Closed files</option></select></label>
     <label className="filter-select"><span className="sr-only">Filter files by follow-up</span><select name="followup" defaultValue={followUp} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="all">All files</option><option value="yes">Needs follow-up</option></select></label>
     <label className="filter-select"><span className="sr-only">Sort files</span><select name="sort" defaultValue={sort} onChange={(event) => event.currentTarget.form?.requestSubmit()}><option value="recent">Most recent</option><option value="completion">Least complete</option></select></label>
   </form>;
 }
 
-export function FileCard({ file }: { file: FileWithPurchasers }) {
+export function FileCard({ file, projectName }: { file: FileWithPurchasers; projectName?: string }) {
   const signed = file.purchasers.filter((p) => p.signing_status === "signed").length;
   const total = file.purchasers.length;
   const followups = file.purchasers.filter((p) => p.follow_up_needed).length;
@@ -25,6 +27,7 @@ export function FileCard({ file }: { file: FileWithPurchasers }) {
     <div className="file-card-top"><span className={`status-pill ${file.status === "open" ? "status-open" : "status-closed"}`}><i />{file.status === "open" ? "Open" : "Closed"}</span><span className="card-arrow">↗</span></div>
     <h2>{file.file_ref}</h2>
     <p className="file-address">{file.property_address}</p>
+    {projectName && <p className="file-lawyer"><strong>Project</strong> {projectName}</p>}
     {file.lawyer_name && <p className="file-lawyer"><strong>Lawyer</strong> {file.lawyer_name}</p>}
     <div className="card-milestone">
       <strong>{milestone?.label ?? "No MOT milestones recorded"}</strong>

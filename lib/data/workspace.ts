@@ -12,6 +12,7 @@ export const getWorkspace = cache(async () => {
       mode: "staff" as const,
       user,
       files: "files",
+      projects: "projects",
       purchasers: "purchasers",
       owner: { user_id: user.id },
     };
@@ -35,6 +36,7 @@ export const getWorkspace = cache(async () => {
     supabase,
     mode: "demo" as const,
     files: "demo_files",
+    projects: "demo_projects",
     purchasers: "demo_purchasers",
     owner: {},
   };

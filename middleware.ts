@@ -4,7 +4,7 @@ import { updateSession } from "@/lib/supabase/middleware";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const trackerRoute = pathname === "/" || pathname.startsWith("/files/");
+  const trackerRoute = pathname === "/" || pathname.startsWith("/files/") || pathname.startsWith("/projects/");
   const currentToken = request.cookies.get(demoCookieName)?.value;
   const newToken = trackerRoute && !isDemoToken(currentToken) ? createDemoToken() : null;
   if (newToken) request.cookies.set(demoCookieName, newToken);

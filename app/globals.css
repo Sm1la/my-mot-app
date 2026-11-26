@@ -136,3 +136,33 @@
 }
 
 .file-lawyer strong { margin-right: 4px; }
+
+.sidebar-navigation {
+  min-height: 0;
+  margin-bottom: 16px;
+  overflow-y: auto;
+}
+
+.company-nav-label { margin-top: 26px; }
+.company-nav-link, .project-nav-link { overflow-wrap: anywhere; }
+.company-nav-link { font-size: 13px; }
+.project-nav { margin: 2px 0 6px 13px; border-left: 1px solid var(--line); }
+.project-nav-link { font-size: 12px; padding-block: 8px; }
+
+.field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.company-projects { margin-bottom: 24px; }
+.company-projects h2 { margin: 0 0 9px; font-size: 16px; }
+.company-projects p { margin: 0; color: #59647a; }
+.company-projects ul { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.company-projects a { display: block; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: #5140bf; overflow-wrap: anywhere; }
+.project-detail-link { color: #5140bf; text-decoration: underline; }
