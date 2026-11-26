@@ -62,7 +62,7 @@ export async function updateMilestonesAction(_state: ActionState, formData: Form
   const dates: Partial<MotMilestoneDates> = {};
   for (const { key, label } of motMilestones) {
     const value = formData.get(key);
-    if (value === null) continue;
+    if (value === null || value === formData.get(`previous_${key}`)) continue;
     if (value === "") {
       dates[key] = null;
       continue;
@@ -76,7 +76,7 @@ export async function updateMilestonesAction(_state: ActionState, formData: Form
     }
     dates[key] = value;
   }
-  if (Object.keys(dates).length === 0) return { error: "Change a milestone date before saving." };
+  if (Object.keys(dates).length === 0) return { success: true };
 
   const { supabase, files } = await getActionWorkspace(formData);
   const { data, error } = await supabase.from(files).update(dates).eq("id", id).select("id").maybeSingle();

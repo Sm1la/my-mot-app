@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { WorkspaceField } from "@/components/Sidebar";
 import { updateMilestonesAction } from "@/lib/actions/files";
 import { motMilestones, type MotMilestoneDates } from "@/lib/milestones";
@@ -9,13 +9,7 @@ import type { ActionState } from "@/lib/types";
 const initialState: ActionState = {};
 
 export function FileMilestones({ fileId, dates }: { fileId: string; dates: MotMilestoneDates }) {
-  const [draft, setDraft] = useState<Partial<MotMilestoneDates>>({});
-  const [state, formAction, pending] = useActionState(async (previousState: ActionState, formData: FormData) => {
-    const result = await updateMilestonesAction(previousState, formData);
-    if (result.success) setDraft({});
-    return result;
-  }, initialState);
-  const hasUnsavedChanges = motMilestones.some(({ key }) => draft[key] !== undefined && draft[key] !== dates[key]);
+  const [state, formAction, pending] = useActionState(updateMilestonesAction, initialState);
 
   return (
     <section className="detail-section" aria-labelledby="mot-milestones-title">
@@ -29,33 +23,22 @@ export function FileMilestones({ fileId, dates }: { fileId: string; dates: MotMi
         <WorkspaceField />
         <input type="hidden" name="id" value={fileId} />
         <div className="milestone-fields">
-          {motMilestones.map(({ key, label }) => {
-            const value = draft[key] === undefined ? dates[key] : draft[key];
-            return (
-              <label key={key} className="field">
+          {motMilestones.map(({ key, label }) => (
+            <div key={`${key}:${dates[key] ?? ""}`}>
+              <label className="field">
                 <span>{label}</span>
-                <input
-                  name={value === dates[key] ? undefined : key}
-                  type="date"
-                  min="0001-01-01"
-                  max="9999-12-31"
-                  value={value ?? ""}
-                  readOnly={pending}
-                  onChange={(event) => {
-                    const nextValue = event.currentTarget.value || null;
-                    setDraft((current) => ({ ...current, [key]: nextValue === dates[key] ? undefined : nextValue }));
-                  }}
-                />
+                <input name={key} type="date" min="0001-01-01" max="9999-12-31" defaultValue={dates[key] ?? ""} readOnly={pending} />
               </label>
-            );
-          })}
+              <input type="hidden" name={`previous_${key}`} value={dates[key] ?? ""} />
+            </div>
+          ))}
         </div>
         <div className="milestone-actions">
-          <button className="button button-primary" disabled={pending || !hasUnsavedChanges}>
+          <button className="button button-primary" disabled={pending}>
             {pending ? "Saving…" : "Save milestone dates"}
           </button>
           {state.error && <p className="form-error" role="alert">{state.error}</p>}
-          {state.success && !hasUnsavedChanges && <p className="form-success" role="status">Milestone dates saved.</p>}
+          {state.success && <p className="form-success" role="status">Milestone dates saved.</p>}
         </div>
       </form>
     </section>
