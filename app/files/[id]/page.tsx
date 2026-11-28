@@ -7,7 +7,7 @@ import { PurchaserTable } from "@/components/PurchaserTable";
 import { getFile } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
 import { formatDate } from "@/lib/dates";
-import { getProjectBlocks, projectQuery } from "@/lib/project-blocks";
+import { getProjectBlocks, getPropertyTypes, projectQuery } from "@/lib/project-blocks";
 import { toggleFileStatus } from "@/lib/actions/files";
 import { getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers, ProjectDirectory } from "@/lib/types";
@@ -26,9 +26,10 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
 
   const project = directory.projects.find((item) => item.id === file.project_id);
   const block = getProjectBlocks(project).find((item) => item.id === file.block_id);
+  const propertyType = getPropertyTypes(block?.id).find((item) => item.id === file.property_type);
   const signed = file.purchasers.filter((p) => p.signing_status === "signed").length;
   const total = file.purchasers.length;
-  return <AppShell mode={mode} directory={directory} activeCompanyId={project?.company_id} activeProjectId={project?.id} activeBlockId={block?.id}><div className="page-wrap">
+  return <AppShell mode={mode} directory={directory} activeCompanyId={project?.company_id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap">
     <Link href="/" className="back-link">← All files</Link>
     <section className="detail-hero">
       <div className="detail-hero-copy">
@@ -38,11 +39,11 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
         {file.unit_no && <p className="file-lawyer"><strong>Unit No.</strong> {file.unit_no}</p>}
         {file.spa_date && <p className="file-lawyer"><strong>SPA Date</strong> <time dateTime={file.spa_date}>{formatDate(file.spa_date)}</time></p>}
         {file.title_no && <p className="file-lawyer"><strong>Title No</strong> {file.title_no}</p>}
-        {project && <p className="file-lawyer"><strong>Project</strong> <Link className="project-detail-link" href={`/${projectQuery(project.id, block?.id)}`}>{project.name}{block && ` / ${block.name}`}</Link></p>}
+        {project && <p className="file-lawyer"><strong>Project</strong> <Link className="project-detail-link" href={`/${projectQuery(project.id, block?.id, propertyType?.id)}`}>{[project.name, block?.name, propertyType?.name].filter(Boolean).join(" / ")}</Link></p>}
         {file.lawyer_name && <p className="file-lawyer"><strong>MOT Lawyer</strong> {file.lawyer_name}</p>}
         {file.notes && <p className="file-notes">{file.notes}</p>}
       </div>
-      <div className="detail-hero-actions"><form action={toggleFileStatus}><WorkspaceField /><input type="hidden" name="id" value={file.id} /><input type="hidden" name="status" value={file.status === "open" ? "closed" : "open"} /><button className="button button-secondary">Mark {file.status === "open" ? "closed" : "open"}</button></form><EditFileDetails file={file} directory={directory} /><DeleteFileButton id={file.id} purchaserCount={total} /></div>
+      <div className="detail-hero-actions"><form action={toggleFileStatus}><WorkspaceField /><input type="hidden" name="id" value={file.id} /><input type="hidden" name="status" value={file.status === "open" ? "closed" : "open"} /><button className="button button-secondary">Mark {file.status === "open" ? "closed" : "open"}</button></form><Link className="button button-secondary" href={`/activity?file=${file.id}`}>File history</Link><EditFileDetails file={file} directory={directory} /><DeleteFileButton id={file.id} purchaserCount={total} /></div>
       <div className="detail-progress"><div><small>Purchaser signing progress</small><strong><span>{signed}</span> / {total} signed</strong></div><div className="progress-track"><span style={{ width: `${total ? (signed / total) * 100 : 0}%` }} /></div></div>
     </section>
     <FileMilestones key={file.id} fileId={file.id} dates={{

@@ -1,5 +1,5 @@
 import type { MotMilestoneDates } from "@/lib/milestones";
-import type { BlockId } from "@/lib/project-blocks";
+import type { BlockId, PropertyType } from "@/lib/project-blocks";
 
 export type FileStatus = "open" | "closed";
 export type SigningStatus = "pending" | "signed";
@@ -17,6 +17,7 @@ export type TransferFile = MotMilestoneDates & {
   title_no: string | null;
   project_id: string | null;
   block_id: BlockId | null;
+  property_type: PropertyType | null;
   lawyer_name: string | null;
   status: FileStatus;
   notes: string | null;

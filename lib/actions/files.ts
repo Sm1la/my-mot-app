@@ -10,8 +10,8 @@ import type { ActionState } from "@/lib/types";
 function readProjectLocation(formData: FormData) {
   const value = formData.get("project_location") ?? formData.get("project_id");
   if (typeof value !== "string") return {};
-  const [projectId, blockId] = value.split(":", 2);
-  return { project_id: projectId || null, block_id: blockId || null };
+  const [projectId, blockId, propertyType] = value.split(":", 3);
+  return { project_id: projectId || null, block_id: blockId || null, property_type: propertyType || null };
 }
 
 function readRegisterDetails(formData: FormData) {
@@ -59,6 +59,7 @@ export async function createFileAction(_state: ActionState, formData: FormData):
 
   if (error?.code === "23503") return { error: "Choose a project from this workspace." };
   if (error?.code === "23514" && error.message.includes("chosen block")) return { error: "Choose a block that belongs to the selected project." };
+  if (error?.code === "23514" && error.message.includes("property_type")) return { error: "Choose Flat or Shop under one of the low-cost blocks." };
   if (error || !data) return { error: "We couldn’t save this file. Check your connection and try again." };
   revalidatePath("/");
   redirect(`/files/${data.id}`);
@@ -91,6 +92,7 @@ export async function updateFileAction(_state: ActionState, formData: FormData):
   const { error } = await supabase.from(files).update(updates).eq("id", id);
   if (error?.code === "23503") return { error: "Choose a project from this workspace." };
   if (error?.code === "23514" && error.message.includes("chosen block")) return { error: "Choose a block that belongs to the selected project." };
+  if (error?.code === "23514" && error.message.includes("property_type")) return { error: "Choose Flat or Shop under one of the low-cost blocks." };
   if (error) return { error: "We couldn’t update this file. Check your connection and try again." };
   revalidatePath("/");
   revalidatePath(`/files/${id}`);

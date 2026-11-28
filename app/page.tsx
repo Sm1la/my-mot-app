@@ -8,11 +8,11 @@ import { TitleReleaseSummary } from "@/components/TitleReleaseSummary";
 import { getFiles } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
 import { formatMonth } from "@/lib/dates";
-import { getProjectBlocks, projectQuery } from "@/lib/project-blocks";
+import { getProjectBlocks, getPropertyTypes, projectQuery } from "@/lib/project-blocks";
 import { getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers, ProjectDirectory } from "@/lib/types";
 
-type SearchParams = Promise<{ status?: string; followup?: string; sort?: string; company?: string; project?: string; block?: string; release?: string }>;
+type SearchParams = Promise<{ status?: string; followup?: string; sort?: string; company?: string; project?: string; block?: string; property?: string; release?: string }>;
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
@@ -33,24 +33,29 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const company = directory.companies.find((item) => item.id === (project?.company_id ?? params.company));
   const blocks = getProjectBlocks(project);
   const block = blocks.find((item) => item.id === params.block);
-  if ((params.project && !project) || (params.company && !company) || (params.block && !block)) notFound();
+  const propertyTypes = getPropertyTypes(block?.id);
+  const propertyType = propertyTypes.find((item) => item.id === params.property);
+  if ((params.project && !project) || (params.company && !company) || (params.block && !block) || (params.property && !propertyType)) notFound();
 
   const projectsById = new Map(directory.projects.map((item) => [item.id, item]));
   const files = allFiles.filter((file) => {
-    if (project) return file.project_id === project.id && (!block || file.block_id === block.id);
+    if (project) return file.project_id === project.id && (!block || file.block_id === block.id) && (!propertyType || file.property_type === propertyType.id);
     if (company) return !!file.project_id && projectsById.get(file.project_id)?.company_id === company.id;
     return true;
   });
   const workspaceLabel = user?.app_metadata.mot_role === "admin" ? "ADMIN WORKSPACE" : user ? "YOUR WORKSPACE" : null;
-  const heading = block?.name ?? project?.name ?? company?.name ?? "Property files";
+  const heading = propertyType?.name ?? block?.name ?? project?.name ?? company?.name ?? "Property files";
+  const parent = block && project
+    ? { name: propertyType ? block.name : project.name, href: `/${projectQuery(project.id, propertyType ? block.id : undefined)}` }
+    : project && company ? { name: company.name, href: `/?company=${company.id}` } : null;
   const companyProjects = company && !project ? directory.projects.filter((item) => item.company_id === company.id) : [];
-  const primaryHref = project ? `/files/new${projectQuery(project.id, block?.id)}` : company ? `/projects/new?company=${company.id}` : "/files/new";
+  const primaryHref = project ? `/files/new${projectQuery(project.id, block?.id, propertyType?.id)}` : company ? `/projects/new?company=${company.id}` : "/files/new";
   const primaryLabel = company && !project ? "Add project" : "New file";
   const registerFilters = new URLSearchParams();
   if (status !== "all") registerFilters.set("status", status);
   if (followUp !== "all") registerFilters.set("followup", followUp);
   if (sort !== "recent") registerFilters.set("sort", sort);
-  const scopeHref = project ? `/${projectQuery(project.id, block?.id)}${registerFilters.size ? `&${registerFilters}` : ""}` : "/";
+  const scopeHref = project ? `/${projectQuery(project.id, block?.id, propertyType?.id)}${registerFilters.size ? `&${registerFilters}` : ""}` : "/";
   const releaseMonth = project && typeof params.release === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(params.release) ? params.release : undefined;
 
   const filtered = files.filter((file) => (status === "all" || file.status === status)
@@ -63,10 +68,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const openCount = files.filter((file) => file.status === "open").length;
   const followUpCount = files.filter((file) => file.purchasers.some((purchaser) => purchaser.follow_up_needed)).length;
 
-  return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id}><div className="page-wrap">
+  return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap">
     <div className="page-heading">
       <div>
-        {block && project ? <Link className="back-link" href={`/${projectQuery(project.id)}`}>← {project.name}</Link> : project && company ? <Link className="back-link" href={`/?company=${company.id}`}>← {company.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
+        {parent ? <Link className="back-link" href={parent.href}>← {parent.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
         <h1>{heading}</h1>
         {!company && <p className="page-subtitle">Track Form 14A (MOT) from receipt to title registration.</p>}
       </div>
@@ -86,16 +91,23 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <ul>{blocks.map((item) => <li key={item.id}><Link href={`/${projectQuery(project.id, item.id)}`}>{item.name}</Link></li>)}</ul>
       </section>
     )}
+    {project && block && !propertyType && propertyTypes.length > 0 && (
+      <section className="company-projects" aria-labelledby="property-types-heading">
+        <h2 id="property-types-heading">Property types</h2>
+        <ul>{propertyTypes.map((item) => <li key={item.id}><Link href={`/${projectQuery(project.id, block.id, item.id)}`}>{item.name}</Link></li>)}</ul>
+      </section>
+    )}
     {project && <>
       <RegistrationSummary files={files} openCount={openCount} followUpCount={followUpCount} />
       <TitleReleaseSummary files={files} scopeHref={scopeHref} selectedMonth={releaseMonth} />
     </>}
     {!project && <section className="overview-stats" aria-label="File overview"><div className="overview-stat"><span className="stat-icon icon-lavender">▦</span><span><small>Total files</small><strong>{files.length}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-mint">◷</span><span><small>Open files</small><strong>{openCount}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-amber">!</span><span><small>Need follow-up</small><strong>{followUpCount}</strong></span></div></section>}
-    <div className="section-heading" id={project ? "mot-register" : undefined}><div><h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>{!project && <p>Review MOT milestones and purchaser signatures.</p>}{releaseMonth && <p>Released in <time dateTime={releaseMonth}>{formatMonth(releaseMonth)}</time> · <Link className="project-detail-link" href={`${scopeHref}#mot-register`}>Show all months</Link></p>}</div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} releaseMonth={releaseMonth} /></div>
+    <div className="section-heading" id={project ? "mot-register" : undefined}><div><h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>{!project && <p>Review MOT milestones and purchaser signatures.</p>}{releaseMonth && <p>Released in <time dateTime={releaseMonth}>{formatMonth(releaseMonth)}</time> · <Link className="project-detail-link" href={`${scopeHref}#mot-register`}>Show all months</Link></p>}</div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} propertyType={propertyType?.id} releaseMonth={releaseMonth} /></div>
     {project ? <ProjectRegister files={filtered} hasFiles={files.length > 0} /> : filtered.length ? <div className="file-grid">{filtered.map((file) => {
       const fileProject = file.project_id ? projectsById.get(file.project_id) : undefined;
       const fileBlock = getProjectBlocks(fileProject).find((item) => item.id === file.block_id);
-      return <FileCard key={file.id} file={file} projectName={fileBlock ? `${fileProject?.name} / ${fileBlock.name}` : fileProject?.name} />;
+      const filePropertyType = getPropertyTypes(fileBlock?.id).find((item) => item.id === file.property_type);
+      return <FileCard key={file.id} file={file} projectName={[fileProject?.name, fileBlock?.name, filePropertyType?.name].filter(Boolean).join(" / ")} />;
     })}</div> : <div className="empty-state"><div className="empty-icon">▦</div><h2>{files.length === 0 ? "No files yet" : "No files match these filters"}</h2><p>{files.length ? "Try changing a filter." : company && !project ? "Files appear here after they’re assigned to a project." : "Create a property file to start tracking it."}</p>{!company && <Link href={primaryHref} className="button button-primary">+ Create a file</Link>}</div>}
   </div></AppShell>;
 }

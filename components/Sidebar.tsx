@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
 import { signOutAction } from "@/lib/actions/auth";
-import { getProjectBlocks, projectQuery, type BlockId } from "@/lib/project-blocks";
+import { getProjectBlocks, getPropertyTypes, projectQuery, type BlockId, type PropertyType } from "@/lib/project-blocks";
 import type { ProjectDirectory } from "@/lib/types";
 
 type WorkspaceMode = "demo" | "staff";
@@ -20,9 +20,10 @@ type NavigationProps = {
   activeCompanyId?: string;
   activeProjectId?: string;
   activeBlockId?: BlockId;
+  activePropertyType?: PropertyType;
 };
 
-export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, activeBlockId }: NavigationProps) {
+export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, activeBlockId, activePropertyType }: NavigationProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -42,6 +43,9 @@ export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, act
           <Link href="/" onClick={() => setOpen(false)} className={`nav-link ${pathname === "/" && !activeCompanyId ? "nav-active" : ""}`}>
             <span className="nav-icon">▦</span> All files
           </Link>
+          <Link href="/activity" onClick={() => setOpen(false)} className={`nav-link ${pathname === "/activity" ? "nav-active" : ""}`}>
+            <span className="nav-icon" aria-hidden="true">◷</span> Activity history
+          </Link>
           {directory && <>
             <div className="nav-label company-nav-label">COMPANIES</div>
             {directory.companies.map((company) => (
@@ -59,9 +63,16 @@ export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, act
                           {project.name}
                         </Link>
                         {getProjectBlocks(project).map((block) => (
-                          <Link key={block.id} href={`/${projectQuery(project.id, block.id)}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link block-nav-link ${project.id === activeProjectId && block.id === activeBlockId ? "nav-active" : ""}`}>
-                            {block.name}
-                          </Link>
+                          <div key={block.id}>
+                            <Link href={`/${projectQuery(project.id, block.id)}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link block-nav-link ${project.id === activeProjectId && block.id === activeBlockId && !activePropertyType ? "nav-active" : ""}`}>
+                              {block.name}
+                            </Link>
+                            {project.id === activeProjectId && block.id === activeBlockId && getPropertyTypes(block.id).map((kind) => (
+                              <Link key={kind.id} href={`/${projectQuery(project.id, block.id, kind.id)}`} onClick={() => setOpen(false)} className={`nav-link project-nav-link property-nav-link ${kind.id === activePropertyType ? "nav-active" : ""}`}>
+                                {kind.name}
+                              </Link>
+                            ))}
+                          </div>
                         ))}
                       </div>
                     ))}

@@ -16,6 +16,8 @@ const standardProjects = [
 
 type StandardProject = (typeof standardProjects)[number];
 export type BlockId = StandardProject["blocks"][number]["id"];
+const propertyTypes = [{ id: "flat", name: "Flat" }, { id: "shop", name: "Shop" }] as const;
+export type PropertyType = (typeof propertyTypes)[number]["id"];
 
 function matchesProject(project: Project, standard: StandardProject) {
   return project.company_id === standard.company && project.name.trim().toLowerCase() === standard.name.toLowerCase();
@@ -34,6 +36,10 @@ export function getProjectBlocks(project?: Project) {
   return (project && standardProjects.find((standard) => matchesProject(project, standard))?.blocks) || [];
 }
 
-export function projectQuery(projectId: string, blockId?: BlockId | null) {
-  return `?project=${projectId}${blockId ? `&block=${blockId}` : ""}`;
+export function getPropertyTypes(blockId?: BlockId | null) {
+  return blockId === "mawar" || blockId === "teratai" ? propertyTypes : [];
+}
+
+export function projectQuery(projectId: string, blockId?: BlockId | null, propertyType?: PropertyType | null) {
+  return `?project=${projectId}${blockId ? `&block=${blockId}` : ""}${propertyType ? `&property=${propertyType}` : ""}`;
 }

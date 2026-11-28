@@ -5,17 +5,18 @@ import { WorkspaceField } from "@/components/Sidebar";
 import { addPurchaserAction, updatePurchaserAction } from "@/lib/actions/purchasers";
 import { createFileAction, deleteFileAction, updateFileAction } from "@/lib/actions/files";
 import { deletePurchaserAction } from "@/lib/actions/purchasers";
-import { getProjectBlocks, type BlockId } from "@/lib/project-blocks";
+import { getProjectBlocks, getPropertyTypes, type BlockId, type PropertyType } from "@/lib/project-blocks";
 import type { ActionState, ProjectDirectory, Purchaser, TransferFile } from "@/lib/types";
 
 const initialState: ActionState = {};
 
-export function FileForm({ file, directory, projectId, blockId }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId }) {
+export function FileForm({ file, directory, projectId, blockId, propertyType }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId; propertyType?: PropertyType }) {
   const action = file ? updateFileAction : createFileAction;
   const [state, formAction, pending] = useActionState(action, initialState);
   const selectedProject = file?.project_id ?? projectId;
   const selectedBlock = file?.block_id ?? blockId;
-  const selectedLocation = selectedProject ? `${selectedProject}${selectedBlock ? `:${selectedBlock}` : ""}` : "";
+  const selectedType = file?.property_type ?? propertyType;
+  const selectedLocation = [selectedProject, selectedBlock, selectedType].filter(Boolean).join(":");
   return (
     <form action={formAction} className="form-stack">
       <WorkspaceField />
@@ -32,7 +33,10 @@ export function FileForm({ file, directory, projectId, blockId }: { file?: Trans
             return <optgroup key={company.id} label={company.name}>
               {projects.map((project) => <Fragment key={project.id}>
                 <option value={project.id}>{project.name}</option>
-                {getProjectBlocks(project).map((block) => <option key={block.id} value={`${project.id}:${block.id}`}>{project.name} / {block.name}</option>)}
+                {getProjectBlocks(project).map((block) => <Fragment key={block.id}>
+                  <option value={`${project.id}:${block.id}`}>{project.name} / {block.name}</option>
+                  {getPropertyTypes(block.id).map((kind) => <option key={kind.id} value={`${project.id}:${block.id}:${kind.id}`}>{project.name} / {block.name} / {kind.name}</option>)}
+                </Fragment>)}
               </Fragment>)}
             </optgroup>;
           })}
