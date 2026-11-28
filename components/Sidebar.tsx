@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useContext, useState } from "react";
+import { BrandMark } from "@/components/BrandMark";
 import { signOutAction } from "@/lib/actions/auth";
 import { getProjectBlocks, getPropertyTypes, projectQuery, type BlockId, type PropertyType } from "@/lib/project-blocks";
 import type { ProjectDirectory } from "@/lib/types";
@@ -30,13 +31,13 @@ export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, act
   return (
     <>
       <header className="mobile-header">
-        <Link href="/" className="brand"><span className="brand-mark" aria-hidden="true">14A</span><span>MOT Tracker</span></Link>
+        <Link href="/" className="brand"><BrandMark /><span>MOT Tracker</span></Link>
         <button className="menu-toggle" aria-label="Open navigation" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "×" : "☰"}</button>
       </header>
       {open && <button className="nav-scrim" aria-label="Close navigation" onClick={() => setOpen(false)} />}
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <Link href="/" className="brand desktop-brand" onClick={() => setOpen(false)}>
-          <span className="brand-mark" aria-hidden="true">14A</span><span><strong>MOT Tracker</strong><small>Form 14A register</small></span>
+          <BrandMark /><span><strong>MOT Tracker</strong><small>Form 14A register</small></span>
         </Link>
         <nav className="sidebar-navigation" aria-label="Workspace">
           <div className="nav-label">WORKSPACE</div>

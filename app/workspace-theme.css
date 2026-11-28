@@ -25,12 +25,12 @@
 .sidebar .brand { padding: 2px 2px 21px; border-bottom: 1px solid var(--line); }
 .sidebar .brand strong, .mobile-header .brand { color: var(--forest); font-weight: 750; }
 .sidebar .brand small, .sidebar-footer { color: var(--muted); }
-.brand-mark {
-  border-radius: 8px;
-  background: var(--forest);
-  color: #f7da90;
-  font: 700 15px var(--serif);
-  letter-spacing: -.25px;
+img.brand-mark {
+  display: block;
+  flex: none;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
 }
 .sidebar .nav-label { margin-top: 25px; color: #576b5d; letter-spacing: .12em; }
 .sidebar .nav-link { color: #3f5649; }
