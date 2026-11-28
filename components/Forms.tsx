@@ -21,8 +21,7 @@ export function FileForm({ file, directory, projectId, blockId, propertyType, lo
     <form action={formAction} className="form-stack">
       <WorkspaceField />
       {file && <input type="hidden" name="id" value={file.id} />}
-      <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
-      <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
+      <label className="field"><span>Unit No. <b>*</b></span><input name="unit_no" defaultValue={file?.unit_no || file?.file_ref || ""} required maxLength={80} /></label>
       {locationLabel ? <>
         <input type="hidden" name="project_location" value={selectedLocation} />
         <label className="field"><span>Project or block</span><input value={locationLabel} readOnly /></label>
@@ -46,7 +45,6 @@ export function FileForm({ file, directory, projectId, blockId, propertyType, lo
         </select>
       </label>}
       <div className="register-fields">
-        <label className="field"><span>Unit No. <em>Optional</em></span><input name="unit_no" defaultValue={file?.unit_no ?? ""} maxLength={80} /></label>
         <label className="field"><span>SPA Date <em>Optional</em></span><input name="spa_date" type="date" min="0001-01-01" max="9999-12-31" defaultValue={file?.spa_date ?? ""} /></label>
         <label className="field"><span>Title No. <em>Optional</em></span><input name="title_no" defaultValue={file?.title_no ?? ""} maxLength={120} /></label>
         <label className="field"><span>MOT Lawyer <em>Optional</em></span><input name="lawyer_name" defaultValue={file?.lawyer_name ?? ""} maxLength={180} /></label>

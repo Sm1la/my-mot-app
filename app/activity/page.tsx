@@ -13,7 +13,7 @@ const fieldNames: Record<string, string> = {
   block_id: "Block", company_id: "Company", file_ref: "File reference", follow_up_needed: "Follow-up needed",
   follow_up_notes: "Follow-up note", lawyer_name: "MOT lawyer", notes: "Remarks", project_id: "Project", property_type: "Property type",
   mot_received_on: "MOT received date", mot_executed_on: "MOT executed date", title_released_on: "Date released title",
-  title_registered_on: "Title registered date", unit_no: "Unit no.", title_no: "Title no.", spa_date: "SPA date",
+  title_registered_on: "Title registered date", unit_no: "Unit No.", title_no: "Title no.", spa_date: "SPA date",
 };
 const locationNames: Record<string, string> = {
   "tower-a": "Tower A", "tower-b": "Tower B", mawar: "Block A (Mawar)", teratai: "Block B (Teratai)", flat: "Flat", shop: "Shop",
@@ -74,7 +74,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Sea
         </div>
         <form action="/activity" method="get" className="history-filters">
           {file && <input type="hidden" name="file" value={file} />}
-          <label className="field"><span>File reference</span><input name="ref" maxLength={80} defaultValue={ref ?? ""} /></label>
+          <label className="field"><span>Unit No. or legacy file reference</span><input name="ref" maxLength={80} defaultValue={ref ?? ""} /></label>
           <label className="field"><span>Record type</span><select name="type" defaultValue={type ?? ""}>
             <option value="">All types</option>
             {activityTypes.map((item) => <option key={item} value={item}>{recordNames[item]}</option>)}
@@ -90,7 +90,7 @@ export default async function ActivityPage({ searchParams }: { searchParams: Sea
                   <div><h2>{recordNames[entry.record_type]} {entry.operation}</h2><p>{entry.label}</p></div>
                   <time dateTime={entry.happened_at}>{timestamp.format(new Date(entry.happened_at))}</time>
                 </div>
-                {entry.file_ref && entry.file_ref !== entry.label && <p className="history-reference">File reference {entry.file_ref}</p>}
+                {entry.file_ref && entry.file_ref !== entry.label && <p className="history-reference">Unit No. or file reference {entry.file_ref}</p>}
                 <ActivityDetails entry={entry} directory={directory} />
                 {entry.file_id && !file && <Link className="project-detail-link history-file-link" href={activityHref({ file: entry.file_id }, 1)}>File history</Link>}
               </li>

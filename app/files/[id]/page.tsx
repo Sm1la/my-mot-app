@@ -34,9 +34,7 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
     <section className="detail-hero">
       <div className="detail-hero-copy">
         <span className={`status-pill ${file.status === "open" ? "status-open" : "status-closed"}`}><i />{file.status === "open" ? "Open file" : "Closed file"}</span>
-        <h1>{file.file_ref}</h1>
-        <p className="detail-address">⌖ {file.property_address}</p>
-        {file.unit_no && <p className="file-lawyer"><strong>Unit No.</strong> {file.unit_no}</p>}
+        <h1>{file.unit_no || file.file_ref || "Unnumbered unit"}</h1>
         {file.spa_date && <p className="file-lawyer"><strong>SPA Date</strong> <time dateTime={file.spa_date}>{formatDate(file.spa_date)}</time></p>}
         {file.title_no && <p className="file-lawyer"><strong>Title No</strong> {file.title_no}</p>}
         {project && <p className="file-lawyer"><strong>Project</strong> <Link className="project-detail-link" href={`/${projectQuery(project.id, block?.id, propertyType?.id)}`}>{[project.name, block?.name, propertyType?.name].filter(Boolean).join(" / ")}</Link></p>}

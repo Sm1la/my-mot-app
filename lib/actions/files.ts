@@ -16,7 +16,6 @@ function readProjectLocation(formData: FormData) {
 
 function readRegisterDetails(formData: FormData) {
   const fields = [
-    { key: "unit_no", label: "unit number", maxLength: 80 },
     { key: "title_no", label: "title number", maxLength: 120 },
     { key: "spa_date", label: "SPA date" },
     { key: "mot_received_on", label: "MOT received date" },
@@ -39,13 +38,11 @@ function readRegisterDetails(formData: FormData) {
 }
 
 export async function createFileAction(_state: ActionState, formData: FormData): Promise<ActionState> {
-  const file_ref = String(formData.get("file_ref") ?? "").trim();
-  const property_address = String(formData.get("property_address") ?? "").trim();
+  const unit_no = String(formData.get("unit_no") ?? "").trim();
   const lawyer_name = String(formData.get("lawyer_name") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim();
 
-  if (!file_ref) return { error: "Enter a file reference." };
-  if (!property_address) return { error: "Enter the property address." };
+  if (!unit_no || unit_no.length > 80) return { error: "Enter a unit number of 1 to 80 characters." };
   if (lawyer_name.length > 180) return { error: "Enter a lawyer name of 180 characters or fewer." };
   const register = readRegisterDetails(formData);
   if (register.error) return { error: register.error };
@@ -53,7 +50,7 @@ export async function createFileAction(_state: ActionState, formData: FormData):
   const { supabase, files, owner } = await getActionWorkspace(formData);
   const { data, error } = await supabase
     .from(files)
-    .insert({ file_ref, property_address, ...readProjectLocation(formData), ...register.values, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
+    .insert({ unit_no, ...readProjectLocation(formData), ...register.values, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
     .select("id")
     .single();
 
@@ -67,23 +64,20 @@ export async function createFileAction(_state: ActionState, formData: FormData):
 
 export async function updateFileAction(_state: ActionState, formData: FormData): Promise<ActionState> {
   const id = String(formData.get("id") ?? "");
-  const file_ref = String(formData.get("file_ref") ?? "").trim();
-  const property_address = String(formData.get("property_address") ?? "").trim();
+  const unit_no = String(formData.get("unit_no") ?? "").trim();
   const lawyerName = formData.get("lawyer_name");
   const lawyer_name = typeof lawyerName === "string" ? lawyerName.trim() : undefined;
   const notes = String(formData.get("notes") ?? "").trim();
 
   if (!id) return { error: "This file could not be identified." };
-  if (!file_ref) return { error: "Enter a file reference." };
-  if (!property_address) return { error: "Enter the property address." };
+  if (!unit_no || unit_no.length > 80) return { error: "Enter a unit number of 1 to 80 characters." };
   if (lawyer_name && lawyer_name.length > 180) return { error: "Enter a lawyer name of 180 characters or fewer." };
   const register = readRegisterDetails(formData);
   if (register.error) return { error: register.error };
 
   const { supabase, files } = await getActionWorkspace(formData);
   const updates = {
-    file_ref,
-    property_address,
+    unit_no,
     notes: notes || null,
     ...readProjectLocation(formData),
     ...register.values,

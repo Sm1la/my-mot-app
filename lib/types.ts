@@ -10,8 +10,7 @@ export type ProjectDirectory = { companies: Company[]; projects: Project[] };
 
 export type TransferFile = MotMilestoneDates & {
   id: string;
-  file_ref: string;
-  property_address: string;
+  file_ref: string | null;
   unit_no: string | null;
   spa_date: string | null;
   title_no: string | null;

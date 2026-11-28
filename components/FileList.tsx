@@ -28,8 +28,7 @@ export function FileCard({ file, projectName }: { file: FileWithPurchasers; proj
   const milestoneDate = milestone && file[milestone.key];
   return <Link href={`/files/${file.id}`} className="file-card">
     <div className="file-card-top"><span className={`status-pill ${file.status === "open" ? "status-open" : "status-closed"}`}><i />{file.status === "open" ? "Open" : "Closed"}</span><span className="card-arrow">↗</span></div>
-    <h2>{file.file_ref}</h2>
-    <p className="file-address">{file.property_address}</p>
+    <h2>{file.unit_no || file.file_ref || "Unnumbered unit"}</h2>
     {projectName && <p className="file-lawyer"><strong>Project</strong> {projectName}</p>}
     {file.lawyer_name && <p className="file-lawyer"><strong>Lawyer</strong> {file.lawyer_name}</p>}
     <div className="card-milestone">

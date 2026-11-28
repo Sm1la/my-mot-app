@@ -20,8 +20,7 @@ export function ProjectRegister({ files, hasFiles }: { files: FileWithPurchasers
             <tr key={file.id}>
               <td>{index + 1}</td>
               <th scope="row">
-                <Link href={`/files/${file.id}`}>{file.unit_no || "Set unit number"}</Link>
-                {!file.unit_no && <small>{file.file_ref}</small>}
+                <Link href={`/files/${file.id}`}>{file.unit_no || file.file_ref || "Set unit number"}</Link>
               </th>
               <td>{file.purchasers.length ? <ul>{file.purchasers.map((purchaser) => <li key={purchaser.id}>{purchaser.name}</li>)}</ul> : "—"}</td>
               <td className="register-date"><RegisterDate value={file.spa_date} /></td>
@@ -29,7 +28,7 @@ export function ProjectRegister({ files, hasFiles }: { files: FileWithPurchasers
               <td>{file.lawyer_name || "—"}</td>
               <td className="register-date"><RegisterDate value={file.mot_received_on} /></td>
               <td className="register-date"><RegisterDate value={file.title_released_on} /></td>
-              <td><RegistrationToggle fileId={file.id} label={file.unit_no || file.file_ref} date={file.title_registered_on} /></td>
+              <td><RegistrationToggle fileId={file.id} label={file.unit_no || file.file_ref || "Unnumbered unit"} date={file.title_registered_on} /></td>
               <td className="register-remarks">{file.notes || "—"}</td>
             </tr>
           ))}

@@ -44,7 +44,7 @@ export async function getFiles(): Promise<FileWithPurchasers[]> {
   if (workspace.mode === "staff") await seedFirstLogin(workspace);
   const { data: files, error } = await supabase
     .from(workspace.files)
-    .select("id, file_ref, property_address, unit_no, spa_date, title_no, project_id, block_id, property_type, lawyer_name, status, notes, created_at, mot_received_on, mot_executed_on, title_released_on, title_registered_on")
+    .select("id, file_ref, unit_no, spa_date, title_no, project_id, block_id, property_type, lawyer_name, status, notes, created_at, mot_received_on, mot_executed_on, title_released_on, title_registered_on")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error("Could not load files. Please refresh and try again.");
