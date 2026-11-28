@@ -30,13 +30,13 @@ export function Sidebar({ mode, directory, activeCompanyId, activeProjectId, act
   return (
     <>
       <header className="mobile-header">
-        <Link href="/" className="brand"><span className="brand-mark">14</span><span>Form 14A</span></Link>
+        <Link href="/" className="brand"><span className="brand-mark" aria-hidden="true">14A</span><span>MOT Tracker</span></Link>
         <button className="menu-toggle" aria-label="Open navigation" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? "×" : "☰"}</button>
       </header>
       {open && <button className="nav-scrim" aria-label="Close navigation" onClick={() => setOpen(false)} />}
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <Link href="/" className="brand desktop-brand" onClick={() => setOpen(false)}>
-          <span className="brand-mark">14</span><span><strong>Form 14A</strong><small>Signing tracker</small></span>
+          <span className="brand-mark" aria-hidden="true">14A</span><span><strong>MOT Tracker</strong><small>Form 14A register</small></span>
         </Link>
         <nav className="sidebar-navigation" aria-label="Workspace">
           <div className="nav-label">WORKSPACE</div>

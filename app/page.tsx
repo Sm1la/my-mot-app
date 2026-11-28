@@ -69,14 +69,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const openCount = files.filter((file) => file.status === "open").length;
   const followUpCount = files.filter((file) => file.purchasers.some((purchaser) => purchaser.follow_up_needed)).length;
 
-  return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap">
+  return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap dashboard-page">
     <div className="page-heading workspace-heading">
-      <div>
+      <div className="workspace-heading-content">
         {parent ? <Link className="back-link" href={parent.href}>← {parent.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
         <h1>{heading}</h1>
         {!company && <p className="page-subtitle">Track Form 14A (MOT) from receipt to title registration.</p>}
+        <Link href={primaryHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> {primaryLabel}</Link>
       </div>
-      <Link href={primaryHref} className="button button-primary"><span className="plus-sign">+</span> {primaryLabel}</Link>
+      <div className="workspace-plan" aria-hidden="true"><span /><span /><span /><span /></div>
     </div>
     {company && !project && (
       <section className="company-projects" aria-labelledby="company-projects-heading">
@@ -98,11 +99,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         <ul>{propertyTypes.map((item) => <li key={item.id}><Link href={`/${projectQuery(project.id, block.id, item.id)}`}>{item.name}</Link></li>)}</ul>
       </section>
     )}
-    {project && <>
+    {project && <div className="project-overview">
       <RegistrationSummary files={files} openCount={openCount} followUpCount={followUpCount} />
       <TitleReleaseSummary files={files} scopeHref={scopeHref} selectedMonth={releaseMonth} />
-    </>}
-    {!project && <section className="overview-stats" aria-label="File overview"><div className="overview-stat"><span className="stat-icon icon-lavender">▦</span><span><small>Total files</small><strong>{files.length}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-mint">◷</span><span><small>Open files</small><strong>{openCount}</strong></span></div><div className="overview-stat"><span className="stat-icon icon-amber">!</span><span><small>Need follow-up</small><strong>{followUpCount}</strong></span></div></section>}
+    </div>}
+    {!project && <section className="overview-stats" aria-label="File overview">
+      <div className="overview-stat"><span className="stat-icon icon-lavender" aria-hidden="true">▦</span><span><small>Total files</small><strong>{files.length}</strong></span></div>
+      <div className="overview-stat"><span className="stat-icon icon-mint" aria-hidden="true">◷</span><span><small>Open files</small><strong>{openCount}</strong></span></div>
+      <div className="overview-stat"><span className="stat-icon icon-amber" aria-hidden="true">!</span><span><small>Need follow-up</small><strong>{followUpCount}</strong></span></div>
+    </section>}
     <div className="section-heading" id={project ? "mot-register" : undefined}><div><h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>{!project && <p>Review MOT milestones and purchaser signatures.</p>}{releaseMonth && <p>Released in <time dateTime={releaseMonth}>{formatMonth(releaseMonth)}</time> · <Link className="project-detail-link" href={`${scopeHref}#mot-register`}>Show all months</Link></p>}</div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} propertyType={propertyType?.id} releaseMonth={releaseMonth} /></div>
     {project ? <ProjectRegister files={filtered} hasFiles={files.length > 0} /> : filtered.length ? <div className="file-grid">{filtered.map((file) => {
       const fileProject = file.project_id ? projectsById.get(file.project_id) : undefined;
