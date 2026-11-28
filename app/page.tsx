@@ -9,6 +9,7 @@ import { getFiles } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
 import { formatMonth } from "@/lib/dates";
 import { getProjectBlocks, getPropertyTypes, projectQuery } from "@/lib/project-blocks";
+import { countSignedPurchasers } from "@/lib/signing";
 import { getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers, ProjectDirectory } from "@/lib/types";
 
@@ -62,7 +63,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     && (followUp === "all" || file.purchasers.some((purchaser) => purchaser.follow_up_needed))
     && (!releaseMonth || file.title_released_on?.startsWith(releaseMonth)));
   if (sort === "completion") filtered.sort((a, b) => {
-    const completion = (file: typeof a) => file.purchasers.length ? file.purchasers.filter((p) => p.signing_status === "signed").length / file.purchasers.length : 0;
+    const completion = (file: typeof a) => file.purchasers.length ? countSignedPurchasers(file) / file.purchasers.length : 0;
     return completion(a) - completion(b);
   });
   const openCount = files.filter((file) => file.status === "open").length;

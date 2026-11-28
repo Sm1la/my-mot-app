@@ -8,6 +8,7 @@ import { getFile } from "@/lib/data/files";
 import { getProjectDirectory } from "@/lib/data/projects";
 import { formatDate } from "@/lib/dates";
 import { getProjectBlocks, getPropertyTypes, projectQuery } from "@/lib/project-blocks";
+import { countSignedPurchasers } from "@/lib/signing";
 import { toggleFileStatus } from "@/lib/actions/files";
 import { getCurrentUser } from "@/lib/supabase/server";
 import type { FileWithPurchasers, ProjectDirectory } from "@/lib/types";
@@ -27,7 +28,7 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
   const project = directory.projects.find((item) => item.id === file.project_id);
   const block = getProjectBlocks(project).find((item) => item.id === file.block_id);
   const propertyType = getPropertyTypes(block?.id).find((item) => item.id === file.property_type);
-  const signed = file.purchasers.filter((p) => p.signing_status === "signed").length;
+  const signed = countSignedPurchasers(file);
   const total = file.purchasers.length;
   return <AppShell mode={mode} directory={directory} activeCompanyId={project?.company_id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap">
     <Link href="/" className="back-link">← All files</Link>
@@ -50,8 +51,8 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
       title_released_on: file.title_released_on,
       title_registered_on: file.title_registered_on,
     }} />
-    <section className="detail-section"><div className="section-heading"><div><h2>Purchasers <span className="result-count">{total}</span></h2><p>Update signing status and follow-up as the file progresses.</p></div></div>
-      <div className="table-card"><PurchaserTable purchasers={file.purchasers} fileId={file.id} /><div className="add-purchaser-wrap"><div className="add-caption"><strong>{project ? "Add purchasers" : "Add a purchaser"}</strong><span>Each purchaser is tracked separately.</span></div><AddPurchaserForm fileId={file.id} multiple={!!project} /></div></div>
+    <section className="detail-section"><div className="section-heading"><div><h2>Purchasers <span className="result-count">{total}</span></h2><p>Saving the MOT received date counts every purchaser on this file as signed.</p></div></div>
+      <div className="table-card"><PurchaserTable purchasers={file.purchasers} fileId={file.id} receivedOn={file.mot_received_on} /><div className="add-purchaser-wrap"><div className="add-caption"><strong>{project ? "Add purchasers" : "Add a purchaser"}</strong><span>Each purchaser is tracked separately.</span></div><AddPurchaserForm fileId={file.id} multiple={!!project} /></div></div>
     </section>
   </div></AppShell>;
 }

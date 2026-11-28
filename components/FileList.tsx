@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/dates";
 import { getLatestMilestone } from "@/lib/milestones";
+import { countSignedPurchasers } from "@/lib/signing";
 import type { FileWithPurchasers } from "@/lib/types";
 
 
@@ -20,7 +21,7 @@ export function FileListControls({ status, followUp, sort, companyId, projectId,
 }
 
 export function FileCard({ file, projectName }: { file: FileWithPurchasers; projectName?: string }) {
-  const signed = file.purchasers.filter((p) => p.signing_status === "signed").length;
+  const signed = countSignedPurchasers(file);
   const total = file.purchasers.length;
   const followups = file.purchasers.filter((p) => p.follow_up_needed).length;
   const completion = total ? Math.round((signed / total) * 100) : 0;
