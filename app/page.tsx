@@ -50,8 +50,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     ? { name: propertyType ? block.name : project.name, href: `/${projectQuery(project.id, propertyType ? block.id : undefined)}` }
     : project && company ? { name: company.name, href: `/?company=${company.id}` } : null;
   const companyProjects = company && !project ? directory.projects.filter((item) => item.company_id === company.id) : [];
-  const primaryHref = project ? `/files/new${projectQuery(project.id, block?.id, propertyType?.id)}` : company ? `/projects/new?company=${company.id}` : "/files/new";
-  const primaryLabel = company && !project ? "Add project" : "New file";
+  const newFileHref = project ? `/files/new${projectQuery(project.id, block?.id, propertyType?.id)}` : "/files/new";
+  const isCompanyOverview = !!company && !project;
   const registerFilters = new URLSearchParams();
   if (status !== "all") registerFilters.set("status", status);
   if (followUp !== "all") registerFilters.set("followup", followUp);
@@ -70,18 +70,21 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const followUpCount = files.filter((file) => file.purchasers.some((purchaser) => purchaser.follow_up_needed)).length;
 
   return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap dashboard-page">
-    <div className="page-heading workspace-heading">
+    <div className={`page-heading workspace-heading${isCompanyOverview ? " company-heading" : ""}`}>
       <div className="workspace-heading-content">
         {parent ? <Link className="back-link" href={parent.href}>← {parent.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
         <h1>{heading}</h1>
         {!company && <p className="page-subtitle">Track Form 14A (MOT) from receipt to title registration.</p>}
-        <Link href={primaryHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> {primaryLabel}</Link>
+        {!isCompanyOverview && <Link href={newFileHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> New file</Link>}
       </div>
       <div className="workspace-plan" aria-hidden="true"><span /><span /><span /><span /></div>
     </div>
-    {company && !project && (
+    {isCompanyOverview && (
       <section className="company-projects" aria-labelledby="company-projects-heading">
-        <h2 id="company-projects-heading">Projects</h2>
+        <div className="projects-heading">
+          <h2 id="company-projects-heading">Projects</h2>
+          <Link href={`/projects/new?company=${company.id}`} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> Add project</Link>
+        </div>
         {companyProjects.length ? (
           <CompanyProjectSummaries projects={companyProjects} files={files} />
         ) : <p>No projects yet. Add a project to organize this company’s files.</p>}
@@ -114,6 +117,6 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       const fileBlock = getProjectBlocks(fileProject).find((item) => item.id === file.block_id);
       const filePropertyType = getPropertyTypes(fileBlock?.id).find((item) => item.id === file.property_type);
       return <FileCard key={file.id} file={file} projectName={[fileProject?.name, fileBlock?.name, filePropertyType?.name].filter(Boolean).join(" / ")} />;
-    })}</div> : <div className="empty-state"><div className="empty-icon">▦</div><h2>{files.length === 0 ? "No files yet" : "No files match these filters"}</h2><p>{files.length ? "Try changing a filter." : company && !project ? "Files appear here after they’re assigned to a project." : "Create a property file to start tracking it."}</p>{!company && <Link href={primaryHref} className="button button-primary">+ Create a file</Link>}</div>}
+    })}</div> : <div className="empty-state"><div className="empty-icon">▦</div><h2>{files.length === 0 ? "No files yet" : "No files match these filters"}</h2><p>{files.length ? "Try changing a filter." : isCompanyOverview ? "Files appear here after they’re assigned to a project." : "Create a property file to start tracking it."}</p>{!company && <Link href={newFileHref} className="button button-primary">+ Create a file</Link>}</div>}
   </div></AppShell>;
 }

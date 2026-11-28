@@ -82,6 +82,11 @@
   box-shadow: 0 3px 9px #10281a52;
 }
 .workspace-heading .button-primary:hover { background: #ffe2a6; }
+.company-heading {
+  display: flex;
+  align-items: center;
+  min-height: 150px;
+}
 
 .workspace-plan {
   position: absolute;
@@ -218,6 +223,22 @@
 .auth-password-toggle { color: var(--purple-dark); }
 .company-projects ul a { background: #edf4eb; }
 .company-projects ul a:hover { background: #ddeade; }
+.projects-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.company-projects .projects-heading h2 { margin: 0; }
+.company-projects .projects-heading .button-primary {
+  display: inline-flex;
+  padding: 0 13px;
+  border-color: transparent;
+  background: var(--purple);
+  color: #fff;
+}
+.company-projects .projects-heading .button-primary:hover { background: var(--purple-dark); }
 .empty-state { background: #fdfefb; border-color: #afc4b4; }
 .empty-icon, .avatar { background: var(--sage); color: var(--purple-dark); }
 .empty-state p { color: var(--muted); }
