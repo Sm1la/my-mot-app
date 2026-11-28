@@ -53,7 +53,30 @@ img.brand-mark {
 .sidebar .nav-icon { color: #216349; }
 .sidebar .nav-active .nav-icon { color: inherit; }
 .sidebar .project-nav { padding-inline-start: 7px; border-color: #c8d9ce; }
-.sidebar .project-nav-link { min-height: 34px; }
+.sidebar .company-nav-link {
+  background: #e0f0e5;
+  border-color: #b1d1bc;
+  color: #164b34;
+  font-weight: 700;
+}
+.sidebar .company-nav-link:hover { background: #d1e8d8; border-color: #94bba2; }
+.sidebar .company-nav-link.nav-active {
+  background: #175942;
+  border-color: #175942;
+  color: #fff;
+}
+.sidebar .project-nav-link {
+  min-height: 34px;
+  background: #e8f1fc;
+  border-color: #bbd1ed;
+  color: #234e7d;
+}
+.sidebar .project-nav-link:hover { background: #dae9fa; border-color: #99b8df; }
+.sidebar .project-nav-link.nav-active {
+  background: #28578a;
+  border-color: #28578a;
+  color: #fff;
+}
 .sidebar .block-nav-link { margin-inline-start: 9px; }
 .sidebar .property-nav-link { margin-inline-start: 18px; }
 .sidebar .signout-button { color: #245440; }
