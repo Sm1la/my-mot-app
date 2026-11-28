@@ -51,8 +51,8 @@ export default async function FileDetailPage({ params }: { params: Promise<{ id:
       title_released_on: file.title_released_on,
       title_registered_on: file.title_registered_on,
     }} />
-    <section className="detail-section"><div className="section-heading"><div><h2>Purchasers <span className="result-count">{total}</span></h2><p>Saving the MOT received date counts every purchaser on this file as signed.</p></div></div>
-      <div className="table-card"><PurchaserTable purchasers={file.purchasers} fileId={file.id} receivedOn={file.mot_received_on} /><div className="add-purchaser-wrap"><div className="add-caption"><strong>{project ? "Add purchasers" : "Add a purchaser"}</strong><span>Each purchaser is tracked separately.</span></div><AddPurchaserForm fileId={file.id} multiple={!!project} /></div></div>
+    <section className="detail-section"><div className="section-heading"><div><h2>Purchasers <span className="result-count">{total}</span></h2><p>Saving the title release date counts every purchaser on this file as signed.</p></div></div>
+      <div className="table-card"><PurchaserTable purchasers={file.purchasers} fileId={file.id} releasedOn={file.title_released_on} /><div className="add-purchaser-wrap"><div className="add-caption"><strong>{project ? "Add purchasers" : "Add a purchaser"}</strong><span>Each purchaser is tracked separately.</span></div><AddPurchaserForm fileId={file.id} multiple={!!project} /></div></div>
     </section>
   </div></AppShell>;
 }
