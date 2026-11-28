@@ -82,7 +82,7 @@ img.brand-mark {
   box-shadow: 0 3px 9px #10281a52;
 }
 .workspace-heading .button-primary:hover { background: #ffe2a6; }
-.company-heading {
+.workspace-heading-compact {
   display: flex;
   align-items: center;
   min-height: 150px;
@@ -239,6 +239,16 @@ img.brand-mark {
   color: #fff;
 }
 .company-projects .projects-heading .button-primary:hover { background: var(--purple-dark); }
+.register-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px 12px;
+}
+.register-heading .list-controls {
+  grid-column: 1 / -1;
+  justify-self: end;
+}
 .empty-state { background: #fdfefb; border-color: #afc4b4; }
 .empty-icon, .avatar { background: var(--sage); color: var(--purple-dark); }
 .empty-state p { color: var(--muted); }

@@ -70,12 +70,12 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const followUpCount = files.filter((file) => file.purchasers.some((purchaser) => purchaser.follow_up_needed)).length;
 
   return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap dashboard-page">
-    <div className={`page-heading workspace-heading${isCompanyOverview ? " company-heading" : ""}`}>
+    <div className={`page-heading workspace-heading${company || project ? " workspace-heading-compact" : ""}`}>
       <div className="workspace-heading-content">
         {parent ? <Link className="back-link" href={parent.href}>← {parent.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
         <h1>{heading}</h1>
         {!company && <p className="page-subtitle">Track Form 14A (MOT) from receipt to title registration.</p>}
-        {!isCompanyOverview && <Link href={newFileHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> New file</Link>}
+        {!company && !project && <Link href={newFileHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> New file</Link>}
       </div>
       <div className="workspace-plan" aria-hidden="true"><span /><span /><span /><span /></div>
     </div>
@@ -111,7 +111,15 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       <div className="overview-stat"><span className="stat-icon icon-mint" aria-hidden="true">◷</span><span><small>Open files</small><strong>{openCount}</strong></span></div>
       <div className="overview-stat"><span className="stat-icon icon-amber" aria-hidden="true">!</span><span><small>Need follow-up</small><strong>{followUpCount}</strong></span></div>
     </section>}
-    <div className="section-heading" id={project ? "mot-register" : undefined}><div><h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>{!project && <p>Review MOT milestones and purchaser signatures.</p>}{releaseMonth && <p>Released in <time dateTime={releaseMonth}>{formatMonth(releaseMonth)}</time> · <Link className="project-detail-link" href={`${scopeHref}#mot-register`}>Show all months</Link></p>}</div><FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} propertyType={propertyType?.id} releaseMonth={releaseMonth} /></div>
+    <div className={project ? "section-heading register-heading" : "section-heading"} id={project ? "mot-register" : undefined}>
+      <div>
+        <h2>{project ? "MOT register" : company ? "Property files" : "All files"} <span className="result-count">{filtered.length}</span></h2>
+        {!project && <p>Review MOT milestones and purchaser signatures.</p>}
+        {releaseMonth && <p>Released in <time dateTime={releaseMonth}>{formatMonth(releaseMonth)}</time> · <Link className="project-detail-link" href={`${scopeHref}#mot-register`}>Show all months</Link></p>}
+      </div>
+      {project && <Link href={newFileHref} className="button button-primary"><span className="plus-sign" aria-hidden="true">+</span> New file</Link>}
+      <FileListControls status={status} followUp={followUp} sort={sort} companyId={project ? undefined : company?.id} projectId={project?.id} blockId={block?.id} propertyType={propertyType?.id} releaseMonth={releaseMonth} />
+    </div>
     {project ? <ProjectRegister files={filtered} hasFiles={files.length > 0} /> : filtered.length ? <div className="file-grid">{filtered.map((file) => {
       const fileProject = file.project_id ? projectsById.get(file.project_id) : undefined;
       const fileBlock = getProjectBlocks(fileProject).find((item) => item.id === file.block_id);
