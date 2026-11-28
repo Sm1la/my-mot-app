@@ -32,7 +32,7 @@ export function FileCard({ file, projectName }: { file: FileWithPurchasers; proj
     <h2>{file.unit_no || file.file_ref || "Unnumbered unit"}</h2>
     {projectName && <p className="file-lawyer"><strong>Project</strong> {projectName}</p>}
     {file.lawyer_name && <p className="file-lawyer"><strong>Lawyer</strong> {file.lawyer_name}</p>}
-    <div className="card-milestone">
+    <div className="card-milestone" data-milestone={milestone?.key}>
       <strong>{milestone?.label ?? "No MOT milestones recorded"}</strong>
       {milestoneDate && <time dateTime={milestoneDate}>{formatDate(milestoneDate)}</time>}
     </div>

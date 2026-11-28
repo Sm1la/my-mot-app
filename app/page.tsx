@@ -70,7 +70,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
   const followUpCount = files.filter((file) => file.purchasers.some((purchaser) => purchaser.follow_up_needed)).length;
 
   return <AppShell mode={user ? "staff" : "demo"} directory={directory} activeCompanyId={company?.id} activeProjectId={project?.id} activeBlockId={block?.id} activePropertyType={propertyType?.id}><div className="page-wrap">
-    <div className="page-heading">
+    <div className="page-heading workspace-heading">
       <div>
         {parent ? <Link className="back-link" href={parent.href}>← {parent.name}</Link> : !company && workspaceLabel && <span className="eyebrow">{workspaceLabel}</span>}
         <h1>{heading}</h1>
