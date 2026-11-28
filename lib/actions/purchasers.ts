@@ -2,15 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { getActionWorkspace } from "@/lib/data/workspace";
+import { readPurchaserNames } from "@/lib/purchaser-names";
 import type { ActionState } from "@/lib/types";
 
 export async function addPurchaserAction(_state: ActionState, formData: FormData): Promise<ActionState> {
   const fileId = String(formData.get("file_id") ?? "");
-  const names = formData.getAll("name").flatMap((value) => typeof value === "string" && value.trim() ? [value.trim()] : []);
   if (!fileId) return { error: "This file could not be identified." };
-  if (names.length === 0) return { error: "Enter at least one purchaser’s full name." };
-  if (names.some((name) => name.length > 180)) return { error: "Enter purchaser names of 180 characters or fewer." };
-  if (new Set(names).size !== names.length) return { error: "Enter each purchaser name once." };
+  const { names, error: validationError } = readPurchaserNames(formData);
+  if (validationError) return { error: validationError };
+  if (!names?.length) return { error: "Enter at least one purchaser’s full name." };
 
   const { supabase, purchasers, owner } = await getActionWorkspace(formData);
   const { error } = await supabase.from(purchasers).insert(names.map((name) => ({ file_id: fileId, name, signing_status: "pending", ...owner })));

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getActionWorkspace } from "@/lib/data/workspace";
 import { isCalendarDate } from "@/lib/dates";
 import { motMilestones, type MotMilestoneDates } from "@/lib/milestones";
+import { readPurchaserNames } from "@/lib/purchaser-names";
 import type { ActionState } from "@/lib/types";
 
 function readProjectLocation(formData: FormData) {
@@ -47,19 +48,21 @@ export async function createFileAction(_state: ActionState, formData: FormData):
   const register = readRegisterDetails(formData);
   if (register.error) return { error: register.error };
 
-  const { supabase, files, owner } = await getActionWorkspace(formData);
-  const { data, error } = await supabase
-    .from(files)
-    .insert({ unit_no, ...readProjectLocation(formData), ...register.values, lawyer_name: lawyer_name || null, notes: notes || null, status: "open", ...owner })
-    .select("id")
-    .single();
+  const { names, error: validationError } = readPurchaserNames(formData);
+  if (validationError) return { error: validationError };
+
+  const { supabase } = await getActionWorkspace(formData);
+  const { data: fileId, error } = await supabase.rpc("create_file_with_purchasers", {
+    file_details: { unit_no, ...readProjectLocation(formData), ...register.values, lawyer_name: lawyer_name || null, notes: notes || null },
+    purchaser_names: names,
+  });
 
   if (error?.code === "23503") return { error: "Choose a project from this workspace." };
   if (error?.code === "23514" && error.message.includes("chosen block")) return { error: "Choose a block that belongs to the selected project." };
   if (error?.code === "23514" && error.message.includes("property_type")) return { error: "Choose Flat or Shop under one of the low-cost blocks." };
-  if (error || !data) return { error: "We couldn’t save this file. Check your connection and try again." };
+  if (error || !fileId) return { error: "We couldn’t save this file. Check your connection and try again." };
   revalidatePath("/");
-  redirect(`/files/${data.id}`);
+  redirect(`/files/${fileId}`);
 }
 
 export async function updateFileAction(_state: ActionState, formData: FormData): Promise<ActionState> {

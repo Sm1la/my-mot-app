@@ -10,9 +10,21 @@ import type { ActionState, ProjectDirectory, Purchaser, TransferFile } from "@/l
 
 const initialState: ActionState = {};
 
+function PurchaserNameFields({ count, optional }: { count: number; optional?: boolean }) {
+  return <div className="register-fields">
+    {Array.from({ length: count }, (_, index) => (
+      <label key={index} className="field">
+        <span>Purchaser {index + 1} name {optional && <em>Optional</em>}</span>
+        <input name="name" maxLength={180} />
+      </label>
+    ))}
+  </div>;
+}
+
 export function FileForm({ file, directory, projectId, blockId, propertyType, locationLabel }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId; propertyType?: PropertyType; locationLabel?: string }) {
   const action = file ? updateFileAction : createFileAction;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [purchaserCount, setPurchaserCount] = useState(3);
   const selectedProject = file?.project_id ?? projectId;
   const selectedBlock = file?.block_id ?? blockId;
   const selectedType = file?.property_type ?? propertyType;
@@ -44,6 +56,12 @@ export function FileForm({ file, directory, projectId, blockId, propertyType, lo
           })}
         </select>
       </label>}
+      {!file && <>
+        <PurchaserNameFields count={purchaserCount} optional />
+        <div className="batch-purchaser-actions">
+          <button type="button" className="button button-secondary" onClick={() => setPurchaserCount((count) => count + 1)}>+ Add another name</button>
+        </div>
+      </>}
       <div className="register-fields">
         <label className="field"><span>SPA Date <em>Optional</em></span><input name="spa_date" type="date" min="0001-01-01" max="9999-12-31" defaultValue={file?.spa_date ?? ""} /></label>
         <label className="field"><span>Title No. <em>Optional</em></span><input name="title_no" defaultValue={file?.title_no ?? ""} maxLength={120} /></label>
@@ -68,11 +86,7 @@ export function AddPurchaserForm({ fileId, multiple = false }: { fileId: string;
     <form action={formAction} className={multiple ? "form-stack batch-purchaser-form" : "add-purchaser-form"}>
       <WorkspaceField />
       <input type="hidden" name="file_id" value={fileId} />
-      {multiple ? <div className="register-fields">
-        {Array.from({ length: 3 + extraFields }, (_, index) => (
-          <label key={index} className="field"><span>Purchaser {index + 1} name</span><input name="name" maxLength={180} /></label>
-        ))}
-      </div> : <>
+      {multiple ? <PurchaserNameFields count={3 + extraFields} /> : <>
         <label className="sr-only" htmlFor="purchaser-name">Purchaser full name</label>
         <input id="purchaser-name" name="name" placeholder="Enter purchaser’s full name" required maxLength={180} />
       </>}
