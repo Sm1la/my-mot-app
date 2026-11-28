@@ -23,7 +23,7 @@ export function TitleReleaseSummary({ files, scopeHref, selectedMonth }: { files
   return (
     <section className="title-release-summary" aria-labelledby="title-release-heading">
       <h2 id="title-release-heading">Title releases by year and month</h2>
-      {years.size === 0 ? <p>No title releases recorded.</p> : (
+      {years.size === 0 ? <p className="release-summary-empty">No title releases recorded.</p> : (
         <div className="table-card register-scroll" role="region" aria-label="Title releases" tabIndex={0}>
           <table className="project-summary-table release-summary-table" aria-label="Title releases by year and month">
             <thead><tr><th scope="col">Release period</th><th scope="col">Titles released</th></tr></thead>
