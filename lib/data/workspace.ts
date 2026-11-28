@@ -30,7 +30,7 @@ export const getWorkspace = cache(async () => {
     },
   );
   const { error } = await supabase.rpc("seed_demo_workspace");
-  if (error) throw new Error("Could not prepare your demo files. Please try again.");
+  if (error) throw new Error("Could not open your demo workspace. Please try again.");
 
   return {
     supabase,

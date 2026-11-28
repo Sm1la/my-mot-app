@@ -1,54 +1,23 @@
 import { getWorkspace } from "@/lib/data/workspace";
 import type { FileWithPurchasers } from "@/lib/types";
 
-type StaffWorkspace = Extract<Awaited<ReturnType<typeof getWorkspace>>, { mode: "staff" }>;
-
-async function seedFirstLogin({ supabase, user }: StaffWorkspace) {
-  if (user.user_metadata?.form14a_demo_seeded === true) return;
-
-  const { count, error: countError } = await supabase.from("files").select("id", { count: "exact", head: true });
-  if (countError) throw new Error("Could not check your workspace. Please refresh and try again.");
-
-  if (count === 0) {
-    const refBase = user.id.replaceAll("-", "").slice(0, 8).toUpperCase();
-    const demoFiles = [
-      { file_ref: `DEMO-${refBase}-01`, property_address: "12 Oak Avenue, Kuala Lumpur", status: "open", notes: "Standard residential transfer. Two joint purchasers." },
-      { file_ref: `DEMO-${refBase}-02`, property_address: "34 Kings Road, Petaling Jaya", status: "open", notes: "Trustee purchase — three parties on title." },
-      { file_ref: `DEMO-${refBase}-03`, property_address: "7 Station Lane, Shah Alam", status: "closed", notes: "Completed transfer. All forms signed." },
-    ];
-    const { data: insertedFiles, error: fileError } = await supabase.from("files").insert(demoFiles.map((file) => ({ ...file, user_id: user.id }))).select("id, file_ref");
-    if (fileError) throw new Error("Could not prepare your sample workspace. Please refresh and try again.");
-
-    const idFor = (index: number) => insertedFiles?.find((file) => file.file_ref === demoFiles[index].file_ref)?.id;
-    const purchasers = [
-      { file_id: idFor(0), name: "John Smith", signing_status: "signed", signing_date: "2024-06-15", follow_up_needed: false },
-      { file_id: idFor(0), name: "Mary Smith", signing_status: "pending", signing_date: null, follow_up_needed: true, follow_up_notes: "Solicitor chasing — no response yet." },
-      { file_id: idFor(1), name: "David Brown", signing_status: "signed", signing_date: "2024-06-20", follow_up_needed: false },
-      { file_id: idFor(1), name: "Sarah Brown", signing_status: "pending", signing_date: null, follow_up_needed: false },
-      { file_id: idFor(1), name: "James Wilson (trustee)", signing_status: "pending", signing_date: null, follow_up_needed: true, follow_up_notes: "Trustee not yet contacted." },
-      { file_id: idFor(2), name: "Robert Taylor", signing_status: "signed", signing_date: "2024-05-10", follow_up_needed: false },
-      { file_id: idFor(2), name: "Emma Taylor", signing_status: "signed", signing_date: "2024-05-10", follow_up_needed: false },
-    ].filter((purchaser) => purchaser.file_id);
-
-    const { error: purchaserError } = await supabase.from("purchasers").insert(purchasers.map((purchaser) => ({ ...purchaser, user_id: user.id })));
-    if (purchaserError) throw new Error("Could not prepare sample purchasers. Please refresh and try again.");
-  }
-
-  const { error: metadataError } = await supabase.auth.updateUser({ data: { ...user.user_metadata, form14a_demo_seeded: true } });
-  if (metadataError) throw new Error("Could not finish preparing your workspace. Please refresh and try again.");
-}
+const demoSampleReferences = ["DEMO-001", "DEMO-002", "DEMO-003"];
 
 export async function getFiles(): Promise<FileWithPurchasers[]> {
   const workspace = await getWorkspace();
   const { supabase } = workspace;
-  if (workspace.mode === "staff") await seedFirstLogin(workspace);
-  const { data: files, error } = await supabase
+  const staffSamplePrefix = workspace.user?.id.replaceAll("-", "").slice(0, 8).toUpperCase();
+  const sampleReferences = staffSamplePrefix
+    ? ["01", "02", "03"].map((suffix) => `DEMO-${staffSamplePrefix}-${suffix}`)
+    : demoSampleReferences;
+  const { data, error } = await supabase
     .from(workspace.files)
     .select("id, file_ref, unit_no, spa_date, title_no, project_id, block_id, property_type, lawyer_name, status, notes, created_at, mot_received_on, mot_executed_on, title_released_on, title_registered_on")
     .order("created_at", { ascending: false });
 
   if (error) throw new Error("Could not load files. Please refresh and try again.");
-  if (!files?.length) return [];
+  const files = (data ?? []).filter((file) => file.unit_no || file.project_id || !sampleReferences.includes(file.file_ref));
+  if (!files.length) return [];
 
   const { data: purchasers, error: purchaserError } = await supabase
     .from(workspace.purchasers)
