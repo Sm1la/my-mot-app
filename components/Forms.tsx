@@ -10,7 +10,7 @@ import type { ActionState, ProjectDirectory, Purchaser, TransferFile } from "@/l
 
 const initialState: ActionState = {};
 
-export function FileForm({ file, directory, projectId, blockId, propertyType }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId; propertyType?: PropertyType }) {
+export function FileForm({ file, directory, projectId, blockId, propertyType, locationLabel }: { file?: TransferFile; directory: ProjectDirectory; projectId?: string; blockId?: BlockId; propertyType?: PropertyType; locationLabel?: string }) {
   const action = file ? updateFileAction : createFileAction;
   const [state, formAction, pending] = useActionState(action, initialState);
   const selectedProject = file?.project_id ?? projectId;
@@ -23,7 +23,10 @@ export function FileForm({ file, directory, projectId, blockId, propertyType }: 
       {file && <input type="hidden" name="id" value={file.id} />}
       <label className="field"><span>File reference <b>*</b></span><input name="file_ref" defaultValue={file?.file_ref ?? ""} placeholder="e.g. PT-2024-0200" required maxLength={80} /></label>
       <label className="field"><span>Property address <b>*</b></span><input name="property_address" defaultValue={file?.property_address ?? ""} placeholder="Street, town or city" required maxLength={300} /></label>
-      <label className="field">
+      {locationLabel ? <>
+        <input type="hidden" name="project_location" value={selectedLocation} />
+        <label className="field"><span>Project or block</span><input value={locationLabel} readOnly /></label>
+      </> : <label className="field">
         <span>Project or block <em>Optional</em></span>
         <select name="project_location" defaultValue={selectedLocation}>
           <option value="">No project</option>
@@ -41,7 +44,7 @@ export function FileForm({ file, directory, projectId, blockId, propertyType }: 
             </optgroup>;
           })}
         </select>
-      </label>
+      </label>}
       <div className="register-fields">
         <label className="field"><span>Unit No. <em>Optional</em></span><input name="unit_no" defaultValue={file?.unit_no ?? ""} maxLength={80} /></label>
         <label className="field"><span>SPA Date <em>Optional</em></span><input name="spa_date" type="date" min="0001-01-01" max="9999-12-31" defaultValue={file?.spa_date ?? ""} /></label>
