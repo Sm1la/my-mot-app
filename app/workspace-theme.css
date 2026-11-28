@@ -33,15 +33,29 @@ img.brand-mark {
   object-fit: contain;
 }
 .sidebar .nav-label { margin-top: 25px; color: #576b5d; letter-spacing: .12em; }
-.sidebar .nav-link { color: #3f5649; }
-.sidebar .nav-link:hover { background: #edf2eb; color: #133f2e; }
-.sidebar .nav-active, .sidebar .nav-active:hover {
-  background: #e0ede1;
-  box-shadow: inset 3px 0 #276148;
-  color: #124632;
+.sidebar .nav-link {
+  min-height: 38px;
+  margin-bottom: 5px;
+  padding: 7px 10px;
+  border: 1px solid #d2e0d3;
+  border-radius: 8px;
+  background: #fff;
+  color: #264b39;
+  box-shadow: 0 1px 2px #1b442412;
 }
+.sidebar .nav-link:hover { background: #edf4eb; border-color: #9bb9a3; }
+.sidebar .nav-active, .sidebar .nav-active:hover {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+}
+.sidebar .nav-link:focus-visible { outline: 2px solid #70a788; outline-offset: -3px; }
 .sidebar .nav-icon { color: #216349; }
-.sidebar .project-nav { border-color: #c8d9ce; }
+.sidebar .nav-active .nav-icon { color: inherit; }
+.sidebar .project-nav { padding-inline-start: 7px; border-color: #c8d9ce; }
+.sidebar .project-nav-link { min-height: 34px; }
+.sidebar .block-nav-link { margin-inline-start: 9px; }
+.sidebar .property-nav-link { margin-inline-start: 18px; }
 .sidebar .signout-button { color: #245440; }
 .sidebar-navigation { scrollbar-color: #a5b7aa transparent; }
 .mobile-header { border-bottom-color: var(--line); }
